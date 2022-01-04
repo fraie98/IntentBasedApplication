@@ -10,7 +10,7 @@ target
 *.swp
 *.pyc
 findbugs-results
-#*.launch
+*.launch
 /thrift
 *.idea/*
 *.iml
