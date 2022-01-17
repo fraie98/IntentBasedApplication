@@ -76,9 +76,27 @@
 		\item \textit{"Test the overall system using Mininet and Floodlight, devising proper scenarios to demonstrate the above functionalities."}
 	\end{enumerate}
 	
-	\chapter{Designing}
 	
 	\chapter{Implementation}
+	\section{Scenario}
+	\noindent The objective of the intent based application is mainly to expose a REST interface to allow the request of an \textbf{intent}. An \textbf{intent} is a request, done by an host, to have a link with another host, this link must tolerate link failures.
+	\noindent Hence the controller must implement a module that is in charge of:
+	\begin{itemize}
+		\item Computing the best path between hostA and hostB
+		\item Installing in the switches of the network the proper rules to establish this path
+		\item Being responsive in case of a link failures and establishing a new path to maintain the link alive
+	\end{itemize}
+	\noindent In the implementation of the application we have re-used some Floodlight modules extending some classes where needed. In the following sections we will analyze the choices done and the classes extended in order to implement the features shown previously.
+	
+	\section{How To Compute A Path: Routing Service}
+	
+	\section{How To Install A Path: Forwarding Base}
+	
+	\section{Floodlight Forwarding Module}
+	
+	\section{Responsiveness To Link Failures \& Topology Changes}
+	
 	
 	\chapter{Testing}
+	
 \end{document}
