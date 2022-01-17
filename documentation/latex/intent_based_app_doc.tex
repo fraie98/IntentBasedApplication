@@ -1,0 +1,84 @@
+% !TeX spellcheck = en_US
+\documentclass[a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{subfig}
+%\usepackage{lipsum}
+\usepackage{verbatim}
+\usepackage[table,xcdraw]{xcolor}
+\geometry{a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=3cm,%
+	heightrounded,bindingoffset=5mm}
+
+\usepackage{color}
+\usepackage{listings}
+\usepackage{xcolor}
+
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			
+			% Top 
+			\includegraphics[width=0.45\textwidth]{img/unipi.png}~\\[2.5cm]
+			
+			
+			% Title
+			\HRule \\[0.4cm]
+			{ \LARGE 
+				\textbf{Intent Based Application}\\[0.4cm]
+				\emph{Group Project Report for Advanced Network Architectures And Wireless Systems}\\[0.4cm]
+			}
+			\HRule \\[1.5cm]
+			
+			
+			
+			% Author
+			{ \large
+				Francesco Iemma \\[0.1cm]
+				Yuri Mazzuoli \\[0.1cm]
+				Giovanni Menghini \\[0.1cm]
+			}
+			
+			\vfill
+			
+			\textsc{\large M.Sc. in Computer Engineering}\\[0.4cm]
+			
+			
+			% Bottom
+			{\large Academic Year 2021/22}
+			
+		\end{center}
+	\end{titlepage}
+	
+	
+	\tableofcontents
+	\newpage
+	
+	\chapter*{Introduction}
+	This project is aimed to design and develop an intent based application. The scenario is the following: \textit{"Consider a set of clients that can communicate through a redundant network
+	(e.g., based on a spine-leaf topology.) An external application can request to install paths
+	between host pairs, by just specifying the endpoint identifiers, we refer to this as an
+	host-2-host intent. The network has to allow communications only among the specified host
+	pairs. Moreover, the network has to automatically reconfigure in case of link failures.
+	Design and realize a system that allows users to request and withdraw host-to-host intents,
+	and configures the underlying network accordingly."}
+
+	
+	\noindent The objectives of the projects are:
+	\begin{enumerate}
+		\item \textit{"Implement a Floodlight module that exposes a RESTful interface allowing clients to create/delete host-to-host instents. The module will then dynamically install and update flow rules in the network to allow the communication among specified pairs. Possible path switches must occur transparently to clients."}
+		
+		\item \textit{"Test the overall system using Mininet and Floodlight, devising proper scenarios to demonstrate the above functionalities."}
+	\end{enumerate}
+	
+	\chapter{Designing}
+	
+	\chapter{Implementation}
+	
+	\chapter{Testing}
+\end{document}
