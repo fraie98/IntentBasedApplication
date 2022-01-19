@@ -16,6 +16,26 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
+\usepackage{color}
+\usepackage{listings}
+\lstset{ %
+	language=Java,                % choose the language of the code
+	basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+	numbers=left,                   % where to put the line-numbers
+	numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+	stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	frame=single,           % adds a frame around the code
+	tabsize=2,          % sets default tabsize to 2 spaces
+	captionpos=b,           % sets the caption-position to bottom
+	breaklines=true,        % sets automatic line breaking
+	breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+	escapeinside={\%*}{*)}          % if you want to add a comment within your code
+}
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
@@ -89,13 +109,56 @@
 	\noindent In the implementation of the application we have re-used some Floodlight modules extending some classes where needed. In the following sections we will analyze the choices done and the classes extended in order to implement the features shown previously.
 	
 	\section{How To Compute A Path: Routing Service}
+	\noindent Floodlight by default exposes a REST inteface to retrieve a path between a source (switch DPID and port ID) and a destination (switch DPID and port ID):
+	\begin{verbatim}
+		/wm/routing/path/{src-dpid}/{src-port}/{dst-dpid}/{dst-port}/json
+	\end{verbatim}
+	
+	\noindent The computation of the path is given from the method \textit{getPath(srcDpid, srcPort, dstDpid, dstPort)} of the class implementing the interface \textit{IRoutingService}\footnote{net.floodlightcontroller.routing.IRoutingService}.
+	
+	\noindent Thus the idea is to reuse this function in order to retrieve the path between hostA and hostB.
 	
 	\section{How To Install A Path: Forwarding Base}
+	\noindent Once we have the path we need to install it inside the switches of the network in order to have the path established and working.
 	
-	\section{Floodlight Forwarding Module}
+	\noindent To do so Floodlight provides the abstract class ForwardingBase\footnote{net.floodlightcontroller.routing.ForwardingBase} which is in charge of implementing a forwarding module. The forwarding module "is responsible for programming flows to a switch in response to a policy decision". The implementation of the abstract class must implement the following abstract method:
+	
+	\begin{lstlisting}[language=Java]
+		public abstract Command processPacketInMessage(IOFSwitch sw, OFPacketIn pi, 
+		IRoutingDecision decision, FloodlightContext cntx);
+	\end{lstlisting}
+	
+	
+	\noindent The Floodlight standard implementation of this abstract class is the class Forwarding\footnote{net.floodlightcontroller.forwarding.Forwarding}.
+	
+	\section{Floodlight Extended Forwarding Module}\label{forwarding}
+	\noindent Thus the idea is to extend Forwarding and redefine the method processPacketInMessage which is in charge of defining what the module must do when a packetIn arrives.
+	
+	\noindent In our scenario the operations that must be performed when a packetIn arrives are:
+	\begin{itemize}
+		\item Retrieving the path using the method \textit{getPath(..)} provided by IRoutingService
+		\item Installing the path using the method \textit{PushRoute(..)} inherited by this module from ForwardingBase
+	\end{itemize}
+	\noindent It is important to underline that before doing so, the logic of the method must check if the packetIn arriving is due to the packet coming from the hostA that has asked the intent and that has as destination the hostB indicated in the intent.
+	
+	\noindent To do this check it is needed a data structure that is in charge of maintaining the list of intent asked and established.
+	
+	\section{REST API For Establishing An Intent}
+	\noindent When the hostA wants to send an intent to make a connection with hostB is has to use the REST API provided by the module \textit{TODO: inserire qui il nome del modulo e come fare la rest}.
+	
+	\noindent When the REST API receives the intent it establish it inserting an entry in a dedicated data structure where it is indicated:
+	\begin{itemize}
+	\item The Source
+	\item The Destination
+	\item Intent Timeout
+	\end{itemize}
+	
+	\noindent Then the intent will be pushed in the network when the source host tries to send a packet to the destination host. When this happens a packetIn sending from the first switch that receives the packet will be sent to the controller and will be handled by the forwarding module seen in \ref{forwarding}
 	
 	\section{Responsiveness To Link Failures \& Topology Changes}
+	To be responsiveness to topology changes we can exploit the ITopologyListener inteface. In fact in the Floodligh documentation for the ToplogyService it is written: \textit{"All the information about the current topology is stored in an immutable data structure called the topology instance. If there is any change in the topology, a new instance is created and the topology changed notification message is called. If other modules want to listen for changes in topology they can implement the ITopologyListener interface."}\footnote{https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/1343623/TopologyService+Dev}.
 	
+	\noindent Thus we can implement a class that implements ITopologyListener and that each time a topology change arrives it recompute the paths of intent involved in the topology change (i.e. the ones that has a link which doesn't work anymore). To do so we can use the TopologyInstance (updated before sending the notification message that the topology has changed) to understand which intent are involved in the topology change.
 	
 	\chapter{Testing}
 	
