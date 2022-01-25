@@ -1,33 +1,26 @@
 package net.floodlightcontroller.unipi.intent;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
-import org.projectfloodlight.openflow.protocol.OFFlowModFlags;
 import org.projectfloodlight.openflow.protocol.OFPacketIn;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
-import org.projectfloodlight.openflow.protocol.action.OFActionOutput;
-import org.projectfloodlight.openflow.protocol.instruction.OFInstruction;
 import org.projectfloodlight.openflow.protocol.match.Match;
 import org.projectfloodlight.openflow.protocol.match.MatchField;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
-import org.projectfloodlight.openflow.types.MacAddress;
-import org.projectfloodlight.openflow.types.OFBufferId;
-import org.projectfloodlight.openflow.types.OFPort;
 
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IOFSwitchListener;
-import net.floodlightcontroller.core.IListener.Command;
+import net.floodlightcontroller.core.module.FloodlightModuleContext;
+import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
-import net.floodlightcontroller.core.types.NodePortTuple;
-import net.floodlightcontroller.devicemanager.IDevice;
-import net.floodlightcontroller.devicemanager.IDeviceService;
+import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.forwarding.Forwarding;
 import net.floodlightcontroller.linkdiscovery.ILinkDiscoveryListener;
 import net.floodlightcontroller.packet.ARP;
@@ -37,10 +30,8 @@ import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.routing.IGatewayService;
 import net.floodlightcontroller.routing.IRoutingDecision;
 import net.floodlightcontroller.routing.IRoutingDecisionChangedListener;
-import net.floodlightcontroller.routing.RoutingDecision;
-import net.floodlightcontroller.util.FlowModUtils;
-import net.floodlightcontroller.util.MatchUtils;
-import net.floodlightcontroller.util.OFMessageUtils;
+import net.floodlightcontroller.routing.Path;
+
 
 
 public class IntentForwarding extends Forwarding  implements IFloodlightModule, IOFSwitchListener, ILinkDiscoveryListener,
@@ -48,6 +39,39 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	IPv4Address deniedSRC=IPv4Address.of("10.0.0.1");
 	IPv4Address deniedDST=IPv4Address.of("10.0.0.2");
+	ArrayList<HostPair> intentsDB;
+	
+	@Override
+	public String getName() {
+		return IntentForwarding.class.getSimpleName();
+	}
+	
+	@Override
+	public Collection<Class<? extends IFloodlightService>> getModuleServices() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<Class<? extends IFloodlightService>, IFloodlightService> getServiceImpls() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	//@Override
+	//public Collection<Class<? extends IFloodlightService>> getModuleDependencies() {
+		// TODO
+		/*Collection<Class<? extends IFloodlightService>> l =
+				new ArrayList<Class<? extends IFloodlightService>>();
+		l.add(IFloodlightProviderService.class);
+		l.add(IRestApiService.class);
+		return l;*/
+	//}
+
+	@Override
+	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
+		intentsDB = new ArrayList<>();
+	}
 	
 	@Override
     public Command processPacketInMessage(IOFSwitch sw, OFPacketIn pi, IRoutingDecision decision, FloodlightContext cntx) {
@@ -85,6 +109,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		return super.processPacketInMessage(sw, pi, d, cntx);
 		
 	}
+	
 	private boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
 		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
 		List<OFAction> actions = new ArrayList<OFAction>(); // no actions = drop
@@ -99,6 +124,22 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		.setHardTimeout(timeout)
 		.setPriority(10000);
 		sw.write(fmb.build());
+		return true;
+	}
+	
+	public boolean addNewIntent(HostPair newPair) {
+		System.out.print("AddNewIntent Called");
+		intentsDB.add(newPair);
+		return true;
+	}
+	
+	public boolean delIntent(HostPair toDelete) {
+		System.out.print("AddNewIntent Called");
+		return true;
+	}
+	
+	public boolean installBackupPath(Path backupPath) {
+		System.out.print("AddNewIntent Called");
 		return true;
 	}
 	

@@ -9,5 +9,13 @@ public class HostPair {
 	DatapathId sw1;
 	MacAddress host2;
 	DatapathId sw2;
-	long timeot;
+	long timeout;
+	
+	public HostPair(String hostA, String hostB, long timeoutToSet) {
+		host1 = MacAddress.of(hostA);
+		host2 = MacAddress.of(hostB);
+		timeout = timeoutToSet;
+		sw1 = null;
+		sw2 = null;
+	}
 }

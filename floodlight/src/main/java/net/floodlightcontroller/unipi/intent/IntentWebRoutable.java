@@ -28,7 +28,8 @@ public class IntentWebRoutable implements RestletRoutable {
         
         // This resource will show the list of switches connected to the controller	        
         router.attach("/controller/switches/json", ControllerSwitchesResource.class);
-        router.attach("/getServersInfo/json", GetServerInfo.class);       	        
+        router.attach("/getServersInfo/json", GetServerInfo.class); 
+        router.attach("/addNewIntent/json", AddNewIntent.class);
         return router;
     }
 
