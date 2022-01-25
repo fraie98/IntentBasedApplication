@@ -32,6 +32,3 @@ net.floodlightcontroller.cpanalyzer.CPAnalyzer
 net.floodlightcontroller.hasupport.HAController
 net.floodlightcontroller.unipi.mactracker.MACTracker
 net.floodlightcontroller.unipi.virtualaddress.VirtualAddress
-net.floodlightcontroller.unipi.loadbalancer.LoadBalancer
-net.floodlightcontroller.unipi.loadbalancer.LoadBalancerREST
-net.floodlightcontroller.unipi.loadbalancer.LoadBalancerWebRoutable
