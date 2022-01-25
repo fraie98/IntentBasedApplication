@@ -44,7 +44,7 @@ import net.floodlightcontroller.util.OFMessageUtils;
 
 
 public class IntentForwarding extends Forwarding  implements IFloodlightModule, IOFSwitchListener, ILinkDiscoveryListener,
-IRoutingDecisionChangedListener, IGatewayService{
+IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	IPv4Address deniedSRC=IPv4Address.of("10.0.0.1");
 	IPv4Address deniedDST=IPv4Address.of("10.0.0.2");

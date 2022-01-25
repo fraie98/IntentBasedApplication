@@ -9,8 +9,8 @@ import org.restlet.resource.ServerResource;
 public class GetServerInfo extends ServerResource {
 	
     @Get("json")
-    public Map<String, Object> Test() {
-    	IIntentRest lb = (IIntentRest) getContext().getAttributes().get(IIntentRest.class.getCanonicalName());
-    	return lb.getServersInfo();
+    public String Test() {
+    	IIntentForwarding lb = (IIntentForwarding) getContext().getAttributes().get(IIntentForwarding.class.getCanonicalName());
+    	return lb.toString();
     }
 }
