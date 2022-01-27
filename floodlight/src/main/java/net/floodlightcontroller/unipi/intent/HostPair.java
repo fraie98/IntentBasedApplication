@@ -1,21 +1,96 @@
 package net.floodlightcontroller.unipi.intent;
 
 import org.projectfloodlight.openflow.types.DatapathId;
+import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.MacAddress;
 
 public class HostPair {
 
-	MacAddress host1;
-	DatapathId sw1;
-	MacAddress host2;
-	DatapathId sw2;
+	protected MacAddress host1;
+	protected IPv4Address host1IP;
+	protected DatapathId sw1;
+	protected MacAddress host2;
+	protected IPv4Address host2IP;
+	protected DatapathId sw2;
+	public MacAddress getHost1() {
+		return host1;
+	}
+
+	public IPv4Address getHost1IP() {
+		return host1IP;
+	}
+
+	public DatapathId getSw1() {
+		return sw1;
+	}
+
+	public MacAddress getHost2() {
+		return host2;
+	}
+
+	public IPv4Address getHost2IP() {
+		return host2IP;
+	}
+
+	public void setHost1IP(IPv4Address host1ip) {
+		host1IP = host1ip;
+	}
+
+	public void setHost2IP(IPv4Address host2ip) {
+		host2IP = host2ip;
+	}
+
+	public DatapathId getSw2() {
+		return sw2;
+	}
+
+	public long getTimeout() {
+		return timeout;
+	}
 	long timeout;
 	
-	public HostPair(String hostA, String hostB, long timeoutToSet) {
-		host1 = MacAddress.of(hostA);
-		host2 = MacAddress.of(hostB);
+	public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
+		host1 = hostA;
+		host2 = hostB;
 		timeout = timeoutToSet;
 		sw1 = null;
 		sw2 = null;
+		host1IP=null;
+		host2IP=null;
+	}
+	
+	public HostPair(MacAddress hostA, MacAddress hostB) {
+		this(hostA, hostB, 0);
+	}
+
+	public HostPair(String hostA, String hostB, long timeoutToSet) {
+		this(MacAddress.of(hostA), MacAddress.of(hostB), timeoutToSet );
+	}
+	public HostPair(IPv4Address hostA, IPv4Address hostB) {
+		this(hostA, hostB,0);
+	}
+	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
+		this((MacAddress)null,(MacAddress)null,timeoutToSet);
+		host1IP=hostA;
+		host2IP=hostA;
+	}
+	@Override
+	public boolean  equals(Object c) {
+		if(!(c instanceof HostPair))
+			return false;
+		HostPair cm = (HostPair) c;
+		if(cm.host1IP!=null && cm.host2!=null) { // compare IPs
+			if(cm.host1IP.equals(this.host1IP) && cm.host2IP.equals(this.host2IP))
+				return true;
+			if(cm.host1IP.equals(this.host2IP) && cm.host2IP.equals(this.host1IP))
+				return true;
+			return false;
+		}
+		// compare MACs
+		if(cm.host1.equals(this.host1) && cm.host2.equals(this.host2))
+			return true;
+		if(cm.host1.equals(this.host2) && cm.host2.equals(this.host1))
+			return true;
+		return false;
 	}
 }
