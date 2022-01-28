@@ -72,21 +72,29 @@ public class HostPair {
 	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
 		this((MacAddress)null,(MacAddress)null,timeoutToSet);
 		host1IP=hostA;
-		host2IP=hostA;
+		host2IP=hostB;
 	}
 	@Override
-	public boolean  equals(Object c) {
-		if(!(c instanceof HostPair))
-			return false;
+	public boolean equals(Object c) {
+		if (this == c)
+            return true;
+        if (c == null)
+            return false;
+        if (getClass() != c.getClass())
+            return false;
 		HostPair cm = (HostPair) c;
-		if(cm.host1IP!=null && cm.host2!=null) { // compare IPs
-			if(cm.host1IP.equals(this.host1IP) && cm.host2IP.equals(this.host2IP))
+		// compare IPss
+		
+		if(cm.host1IP!=null && cm.host2IP!=null && host1IP!=null && host2IP!=null) { 
+			if(cm.host1IP.equals(host1IP) && cm.host2IP.equals(host2IP))
 				return true;
-			if(cm.host1IP.equals(this.host2IP) && cm.host2IP.equals(this.host1IP))
-				return true;
+			if(cm.host1IP.equals(host2IP) && cm.host2IP.equals(host1IP))
+				return true; 
 			return false;
 		}
 		// compare MACs
+		if(cm.host1==null || cm.host2==null || this.host1==null || this.host2==null)
+			return false;
 		if(cm.host1.equals(this.host1) && cm.host2.equals(this.host2))
 			return true;
 		if(cm.host1.equals(this.host2) && cm.host2.equals(this.host1))

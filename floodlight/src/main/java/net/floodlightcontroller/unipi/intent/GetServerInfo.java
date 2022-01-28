@@ -6,11 +6,16 @@ import java.util.Map;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
+import net.floodlightcontroller.core.types.JsonObjectWrapper;
+import net.floodlightcontroller.forwarding.Forwarding;
+
 public class GetServerInfo extends ServerResource {
 	
     @Get("json")
-    public String Test() {
-    	IIntentForwarding lb = (IIntentForwarding) getContext().getAttributes().get(IIntentForwarding.class.getCanonicalName());
-    	return lb.toString();
+    public JsonObjectWrapper getServiceClassName() {
+    	IIntentForwarding inf= (IIntentForwarding) getContext().getAttributes().get(IIntentForwarding.class.getCanonicalName());
+    	Map<String, Object> info = new HashMap<String, Object>();
+		info.put("NAME",inf.getName());
+		return JsonObjectWrapper.of(info);
     }
 }
