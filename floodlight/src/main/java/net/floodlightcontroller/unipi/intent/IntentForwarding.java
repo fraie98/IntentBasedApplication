@@ -33,9 +33,6 @@ import net.floodlightcontroller.routing.IGatewayService;
 import net.floodlightcontroller.routing.IRoutingDecision;
 import net.floodlightcontroller.routing.IRoutingDecisionChangedListener;
 import net.floodlightcontroller.routing.Path;
-import net.floodlightcontroller.routing.web.RoutingWebRoutable;
-import net.floodlightcontroller.unipi.loadbalancer.ILoadBalancerREST;
-import net.floodlightcontroller.unipi.loadbalancer.LoadBalancer;
 
 
 
@@ -187,8 +184,12 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	}
 	
 	public boolean delIntent(HostPair toDelete) {
-		System.out.print("AddNewIntent Called");
-		// TODO
+		System.out.print("delIntent Called");
+		for (HostPair i : intentsDB) {
+			if (i.getHost1() == toDelete.getHost1() && i.getHost2() == toDelete.getHost2()) {
+				intentsDB.remove(i);
+			}
+		}
 		return true;
 	}
 	
