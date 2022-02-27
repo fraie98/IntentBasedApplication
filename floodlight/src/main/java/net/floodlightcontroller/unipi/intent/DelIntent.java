@@ -8,7 +8,7 @@ import org.restlet.resource.ServerResource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class delIntent extends ServerResource {
+public class DelIntent extends ServerResource {
 	
 	@Get("json")
 	public boolean delInt(String json) {
