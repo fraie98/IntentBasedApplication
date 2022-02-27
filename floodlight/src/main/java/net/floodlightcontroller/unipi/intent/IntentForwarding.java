@@ -29,9 +29,11 @@ import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPacket;
 import net.floodlightcontroller.packet.IPv4;
 import net.floodlightcontroller.restserver.IRestApiService;
+import net.floodlightcontroller.routing.ForwardingBase;
 import net.floodlightcontroller.routing.IGatewayService;
 import net.floodlightcontroller.routing.IRoutingDecision;
 import net.floodlightcontroller.routing.IRoutingDecisionChangedListener;
+import net.floodlightcontroller.routing.IRoutingService;
 import net.floodlightcontroller.routing.Path;
 
 
@@ -40,6 +42,8 @@ public class IntentForwarding extends Forwarding  implements IFloodlightModule, 
 IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	ArrayList<HostPair> intentsDB;
+	IRoutingService routingService;
+	ForwardingBase forwardingBase;
 	
 	@Override
 	public String getName() {
@@ -68,6 +72,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				new ArrayList<Class<? extends IFloodlightService>>();
 		l.add(IFloodlightProviderService.class);
 		l.add(IRestApiService.class);
+		l.add(IRoutingService.class);
 		return l;
 	}
 
@@ -76,13 +81,18 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		intentsDB = new ArrayList<>();
 		HostPair test = new HostPair(IPv4Address.of("10.0.0.1"),IPv4Address.of("10.0.0.2") , 1000);
 		intentsDB.add(test);
+		routingService = context.getServiceImpl(IRoutingService.class);
+		// Forwarding base è una classe abstract e non una interfaccia, quindi non si può ottenere in questo modo
+		//forwardingBase = context.getServiceImpl(ForwardingBase.class);
 		super.init(context);
 	}
-	 @Override
-	 public void startUp(FloodlightModuleContext context) {
-	        super.startUp();
-	        restApiService.addRestletRoutable(new IntentWebRoutable());
-	    }
+	
+	@Override
+	public void startUp(FloodlightModuleContext context) {
+		super.startUp();
+	    restApiService.addRestletRoutable(new IntentWebRoutable());
+	}
+	
 	public Command handleARP(IOFSwitch sw, OFPacketIn pi, IRoutingDecision d, FloodlightContext cntx) {
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx,
 				IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
@@ -110,6 +120,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		return Command.STOP;
 		
 	}
+	
 	@Override
     public Command processPacketInMessage(IOFSwitch sw, OFPacketIn pi, IRoutingDecision decision, FloodlightContext cntx) {
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx,
@@ -127,18 +138,40 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		if(!(pkt instanceof IPv4))
 			return super.processPacketInMessage(sw, pi, decision, cntx);
 		IPv4 ip_pkt = (IPv4) pkt;
-		IPv4Address sourceIP=ip_pkt.getSourceAddress();
-		IPv4Address destinIP=ip_pkt.getDestinationAddress();
+		IPv4Address sourceIP = ip_pkt.getSourceAddress();
+		IPv4Address destinIP = ip_pkt.getDestinationAddress();
 		HostPair hp = new HostPair(sourceIP, destinIP);
 		if(intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
-						sourceIP.toString(), destinIP.toString(), sw.getId());  
-				return super.processPacketInMessage(sw, pi, decision, cntx);	
+						sourceIP.toString(), destinIP.toString(), sw.getId());
+				makeRoute(sw, sourceIP, destinIP, 1000);
+				return Command.CONTINUE;
+				//return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
-		denyRoute(sw,sourceIP, destinIP, 1000);
+		denyRoute(sw, sourceIP, destinIP, 1000);
 		denyRoute(sw, destinIP,sourceIP, 1000);
 		return Command.CONTINUE;
 		
+	}
+	
+	private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
+		HostPair currentHostPair = null;
+		for (HostPair i : intentsDB) {
+			if (i.getHost1IP() == sourceIP && i.getHost2IP() == destinIP) {
+				currentHostPair = i;
+			}
+		}
+		if (currentHostPair==null) {
+			System.out.println(" Critical error - no host pair exists");
+			return false;
+		}
+
+		// Retrieve the best path using the method getPath provided by IRoutingService
+		Path bestPath = routingService.getPath(currentHostPair.getSw1(), currentHostPair.getSw2());
+		
+		// Now I have the path and I need to install it using the method pushRoute provided by ForwardingBase
+		
+		return true;
 	}
 	
 	private boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {

@@ -6,7 +6,7 @@ import org.restlet.resource.ServerResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class getIntents extends ServerResource {
+public class GetIntents extends ServerResource {
 	
 	@Get("json")
 	public Iterable<HostPair> getInts() {
