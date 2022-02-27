@@ -144,9 +144,9 @@
 	\noindent To do this check it is needed a data structure that is in charge of maintaining the list of intent asked and established.
 	
 	\section{REST API For Establishing An Intent}
-	\noindent When the hostA wants to send an intent to make a connection with hostB is has to use the REST API provided by the module \textit{TODO: inserire qui il nome del modulo e come fare la rest}.
+	\noindent When the hostA wants to send an intent to make a connection with hostB it has to use the REST API. This API is provided by the classes: IntentWebRoutable, AddNewIntent, DelIntent and GetIntent; these classes use methods from IntentForwarding.
 	
-	\noindent When the REST API receives the intent it establish it inserting an entry in a dedicated data structure where it is indicated:
+	\noindent When the REST API receives the intent, it establishes it inserting an entry in a dedicated data structure where it is indicated:
 	\begin{itemize}
 	\item The Source
 	\item The Destination
@@ -156,7 +156,7 @@
 	\noindent Then the intent will be pushed in the network when the source host tries to send a packet to the destination host. When this happens a packetIn sending from the first switch that receives the packet will be sent to the controller and will be handled by the forwarding module seen in \ref{forwarding}
 	
 	\section{Responsiveness To Link Failures \& Topology Changes}
-	To be responsiveness to topology changes we can exploit the ITopologyListener inteface. In fact in the Floodligh documentation for the ToplogyService it is written: \textit{"All the information about the current topology is stored in an immutable data structure called the topology instance. If there is any change in the topology, a new instance is created and the topology changed notification message is called. If other modules want to listen for changes in topology they can implement the ITopologyListener interface."}\footnote{https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/1343623/TopologyService+Dev}.
+	To be responsiveness to topology changes we can exploit the ITopologyListener inteface. In fact in the Floodligh documentation for the TopologyService it is written: \textit{"All the information about the current topology is stored in an immutable data structure called the topology instance. If there is any change in the topology, a new instance is created and the topology changed notification message is called. If other modules want to listen for changes in topology they can implement the ITopologyListener interface."}\footnote{https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/1343623/TopologyService+Dev}.
 	
 	\noindent Thus we can implement a class that implements ITopologyListener and that each time a topology change arrives it recompute the paths of intent involved in the topology change (i.e. the ones that has a link which doesn't work anymore). To do so we can use the TopologyInstance (updated before sending the notification message that the topology has changed) to understand which intent are involved in the topology change.
 	
