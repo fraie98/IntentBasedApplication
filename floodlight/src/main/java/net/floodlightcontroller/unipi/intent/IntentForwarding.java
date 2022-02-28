@@ -138,13 +138,21 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		IPv4 ip_pkt = (IPv4) pkt;
 		IPv4Address sourceIP = ip_pkt.getSourceAddress();
 		IPv4Address destinIP = ip_pkt.getDestinationAddress();
-		HostPair hp = new HostPair(sourceIP, destinIP);
-		if(intentsDB.contains(hp)) {
+		//HostPair hp = new HostPair(sourceIP, destinIP, );
+		HostPair hp = getIntentInfo(sourceIP, destinIP);
+		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
-				makeRoute(sw, sourceIP, destinIP, 1000, pi, cntx);
-				return Command.CONTINUE;
-				//return super.processPacketInMessage(sw, pi, decision, cntx);	
+				//makeRoute(sw, sourceIP, destinIP, 1000, pi, cntx);
+				//return Command.CONTINUE;
+				
+				/* ERROR: decision is null
+				short timeout = (short)hp.getTimeout();
+				System.out.printf("Timeout: %d\n", timeout);
+				short timeout2 = 6000;
+				System.out.printf("Timeout: %d\n", timeout2);
+				decision.setHardTimeout(timeout2);*/
+				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
 		denyRoute(sw, sourceIP, destinIP, 1000);
 		denyRoute(sw, destinIP,sourceIP, 1000);
@@ -152,27 +160,41 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		
 	}
 	
-	private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout, 
+	private HostPair getIntentInfo(IPv4Address sourceIP, IPv4Address destIP) {
+		for (HostPair i : intentsDB) {
+			if (i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destIP.toString())) {
+				return i;
+			}
+		}
+		return null;
+	}
+	
+	/*private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout, 
 			OFPacketIn pi, FloodlightContext cntx) {
 		HostPair currentHostPair = null;
 		for (HostPair i : intentsDB) {
-			if (i.getHost1IP() == sourceIP && i.getHost2IP() == destinIP) {
+			System.out.printf(" i : %s %s - To check %s %s", i.getHost1IP().toString(), i.getHost2IP().toString(),
+					sourceIP.toString(), destinIP.toString());
+			if (i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destinIP.toString()))
 				currentHostPair = i;
-			}
 		}
 		if (currentHostPair==null) {
 			System.out.println(" Critical error - no host pair exists");
 			return false;
 		}
-
+		log.info("Arrived here - All ok");
 		// Retrieve the best path using the method getPath provided by IRoutingService
-		Path bestPath = routingService.getPath(currentHostPair.getSw1(), currentHostPair.getSw2());
-		DatapathId pinSwitch = bestPath.getId().getSrc();
+		Path bestPathDirect = routingService.getPath(currentHostPair.getSw1(), currentHostPair.getSw2());
+		DatapathId pinSwitchDirect = bestPathDirect.getId().getSrc();
 		
+		Path bestPathReverse = routingService.getPath(currentHostPair.getSw2(), currentHostPair.getSw1());
+		DatapathId pinSwitchReverse = bestPathReverse.getId().getSrc();
+		log.info("Path Computed - All ok");
 		// Now I have the path and I need to install it using the method pushRoute provided by ForwardingBase
-		super.pushRoute(bestPath, pi.getMatch(), pi, pinSwitch, null, cntx, false, OFFlowModCommand.ADD, false);
+		super.pushRoute(bestPathDirect, pi.getMatch(), pi, pinSwitchDirect, null, cntx, false, OFFlowModCommand.ADD, false);
+		super.pushRoute(bestPathReverse, pi.getMatch(), pi, pinSwitchReverse, null, cntx, false, OFFlowModCommand.ADD, false);
 		return true;
-	}
+	}*/
 	
 	private boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
 		log.info("dening IPv4: {} - {} on switch "+sw.getId().toString()+"\n",
@@ -211,14 +233,17 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	}
 	
 	public boolean addNewIntent(HostPair newPair) {
-		System.out.print("AddNewIntent Called");
-		// TODO: If an intent is already present must not be added
+		System.out.print("AddNewIntent Called\n");
+		if(intentsDB.contains(newPair)) {
+			log.info(" Intent already present in Intents List");
+			return false;
+		}
 		intentsDB.add(newPair);
 		return true;
 	}
 	
 	public boolean delIntent(HostPair toDelete) {
-		System.out.print("delIntent Called");
+		System.out.print("delIntent Called\n");
 		for (HostPair i : intentsDB) {
 			if (i.getHost1() == toDelete.getHost1() && i.getHost2() == toDelete.getHost2()) {
 				intentsDB.remove(i);

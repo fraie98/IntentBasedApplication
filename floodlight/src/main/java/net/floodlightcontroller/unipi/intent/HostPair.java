@@ -12,6 +12,8 @@ public class HostPair {
 	protected MacAddress host2;
 	protected IPv4Address host2IP;
 	protected DatapathId sw2;
+	protected long timeout;
+	
 	public MacAddress getHost1() {
 		return host1;
 	}
@@ -47,7 +49,6 @@ public class HostPair {
 	public long getTimeout() {
 		return timeout;
 	}
-	long timeout;
 	
 	public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
 		host1 = hostA;
@@ -67,7 +68,7 @@ public class HostPair {
 		this(MacAddress.of(hostA), MacAddress.of(hostB), timeoutToSet );
 	}
 	public HostPair(IPv4Address hostA, IPv4Address hostB) {
-		this(hostA, hostB,0);
+		this(hostA, hostB, 0);
 	}
 	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
 		this((MacAddress)null,(MacAddress)null,timeoutToSet);
