@@ -74,6 +74,28 @@ public class HostPair {
 		host1IP=hostA;
 		host2IP=hostB;
 	}
+	
+	public HostPair(String hostA, String hostB, long timeoutToSet, boolean isMac) {
+		if (isMac) {
+			host1 = MacAddress.of(hostA);
+			host2 = MacAddress.of(hostB);
+			timeout = timeoutToSet;
+			sw1 = null;
+			sw2 = null;
+			host1IP=null;
+			host2IP=null;
+		}
+		else {
+			host1 = (MacAddress)null;
+			host2 = (MacAddress)null;
+			timeout = timeoutToSet;
+			sw1 = null;
+			sw2 = null;
+			host1IP = IPv4Address.of(hostA); 
+			host2IP = IPv4Address.of(hostB);
+		}
+	}
+	
 	@Override
 	public boolean equals(Object c) {
 		if (this == c)

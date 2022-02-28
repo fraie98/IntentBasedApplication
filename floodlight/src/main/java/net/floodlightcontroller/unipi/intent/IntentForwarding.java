@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
+import org.projectfloodlight.openflow.protocol.OFFlowModCommand;
 import org.projectfloodlight.openflow.protocol.OFPacketIn;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
 import org.projectfloodlight.openflow.protocol.match.Match;
 import org.projectfloodlight.openflow.protocol.match.MatchField;
+import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.MacAddress;
@@ -79,11 +81,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	@Override
 	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
 		intentsDB = new ArrayList<>();
-		HostPair test = new HostPair(IPv4Address.of("10.0.0.1"),IPv4Address.of("10.0.0.2") , 1000);
-		intentsDB.add(test);
 		routingService = context.getServiceImpl(IRoutingService.class);
-		// Forwarding base è una classe abstract e non una interfaccia, quindi non si può ottenere in questo modo
-		//forwardingBase = context.getServiceImpl(ForwardingBase.class);
 		super.init(context);
 	}
 	
@@ -144,7 +142,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		if(intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
-				makeRoute(sw, sourceIP, destinIP, 1000);
+				makeRoute(sw, sourceIP, destinIP, 1000, pi, cntx);
 				return Command.CONTINUE;
 				//return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
@@ -154,7 +152,8 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		
 	}
 	
-	private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
+	private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout, 
+			OFPacketIn pi, FloodlightContext cntx) {
 		HostPair currentHostPair = null;
 		for (HostPair i : intentsDB) {
 			if (i.getHost1IP() == sourceIP && i.getHost2IP() == destinIP) {
@@ -168,9 +167,10 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 
 		// Retrieve the best path using the method getPath provided by IRoutingService
 		Path bestPath = routingService.getPath(currentHostPair.getSw1(), currentHostPair.getSw2());
+		DatapathId pinSwitch = bestPath.getId().getSrc();
 		
 		// Now I have the path and I need to install it using the method pushRoute provided by ForwardingBase
-		
+		super.pushRoute(bestPath, pi.getMatch(), pi, pinSwitch, null, cntx, false, OFFlowModCommand.ADD, false);
 		return true;
 	}
 	
@@ -212,6 +212,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	public boolean addNewIntent(HostPair newPair) {
 		System.out.print("AddNewIntent Called");
+		// TODO: If an intent is already present must not be added
 		intentsDB.add(newPair);
 		return true;
 	}
