@@ -98,7 +98,6 @@
 	
 	
 	\chapter{Implementation}
-	\section{Scenario}
 	\noindent The objective of the intent based application is mainly to expose a REST interface to allow the request of an \textbf{intent}. An \textbf{intent} is a request, done by an host, to have a link with another host, this link must tolerate link failures.
 	\noindent Hence the controller must implement a module that is in charge of:
 	\begin{itemize}
@@ -108,17 +107,15 @@
 	\end{itemize}
 	\noindent In the implementation of the application we have re-used some Floodlight modules extending some classes where needed. In the following sections we will analyze the choices done and the classes extended in order to implement the features shown previously.
 	
-	\section{How To Compute A Path: Routing Service}
-	\noindent Floodlight by default exposes a REST inteface to retrieve a path between a source (switch DPID and port ID) and a destination (switch DPID and port ID):
-	\begin{verbatim}
-		/wm/routing/path/{src-dpid}/{src-port}/{dst-dpid}/{dst-port}/json
-	\end{verbatim}
+	\section{Floodlight Functionalities}
+	\subsection{How To Compute A Path: Routing Service}
+	\noindent Floodlight by default exposes a REST inteface to retrieve a path between a source (switch DPID and port ID) and a destination (switch DPID and port ID).
 	
 	\noindent The computation of the path is given from the method \textit{getPath(srcDpid, srcPort, dstDpid, dstPort)} of the class implementing the interface \textit{IRoutingService}\footnote{net.floodlightcontroller.routing.IRoutingService}.
 	
 	\noindent Thus the idea is to reuse this function in order to retrieve the path between hostA and hostB.
 	
-	\section{How To Install A Path: Forwarding Base}
+	\subsection{How To Install A Path: Forwarding Base}
 	\noindent Once we have the path we need to install it inside the switches of the network in order to have the path established and working.
 	
 	\noindent To do so Floodlight provides the abstract class ForwardingBase\footnote{net.floodlightcontroller.routing.ForwardingBase} which is in charge of implementing a forwarding module. The forwarding module "is responsible for programming flows to a switch in response to a policy decision". The implementation of the abstract class must implement the following abstract method:
