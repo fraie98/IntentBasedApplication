@@ -24,5 +24,8 @@ hs_err_pid*
 floodlight/target
 /.metadata/
 
+# python cache
+*.pyc
+
 .project
 .vscode/
