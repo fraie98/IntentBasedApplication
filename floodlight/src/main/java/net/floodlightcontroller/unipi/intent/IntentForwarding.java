@@ -134,22 +134,19 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		IPv4 ip_pkt = (IPv4) pkt;
 		IPv4Address sourceIP = ip_pkt.getSourceAddress();
 		IPv4Address destinIP = ip_pkt.getDestinationAddress();
-		//HostPair hp = new HostPair(sourceIP, destinIP, );
+		
 		HostPair hp = getIntentInfo(sourceIP, destinIP);
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
 				
 				/* The setup of the timer is done only for the first packetIn
-				 * related to a particular intent. We recognize that it is the first
-				 * packetIn because the timeout of the intent is not 0:
-				 * after the setup of the timer the timeout is set to 0 in 
-				 * order to avoid another timeout setup.*/
-				if (hp.getTimeout()!=0) {
+				 * related to a particular intent. */
+				if (hp.getState() == IntentState.TO_SETUP) {
 					long timeout = hp.getTimeout();
-					hp.setTimeout(0);
+					hp.setState(IntentState.TIMER_SETUP_DONE);
 					Timer timer = new Timer();
-					TimerTask task = new TimeoutTask(hp, this);
+					TimerTask task = new TimeoutTask(hp, sw, this);
 					timer.schedule(task, timeout);
 				}
 				
@@ -170,35 +167,8 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		}
 		return null;
 	}
-	
-	/*private boolean makeRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout, 
-			OFPacketIn pi, FloodlightContext cntx) {
-		HostPair currentHostPair = null;
-		for (HostPair i : intentsDB) {
-			System.out.printf(" i : %s %s - To check %s %s", i.getHost1IP().toString(), i.getHost2IP().toString(),
-					sourceIP.toString(), destinIP.toString());
-			if (i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destinIP.toString()))
-				currentHostPair = i;
-		}
-		if (currentHostPair==null) {
-			System.out.println(" Critical error - no host pair exists");
-			return false;
-		}
-		log.info("Arrived here - All ok");
-		// Retrieve the best path using the method getPath provided by IRoutingService
-		Path bestPathDirect = routingService.getPath(currentHostPair.getSw1(), currentHostPair.getSw2());
-		DatapathId pinSwitchDirect = bestPathDirect.getId().getSrc();
-		
-		Path bestPathReverse = routingService.getPath(currentHostPair.getSw2(), currentHostPair.getSw1());
-		DatapathId pinSwitchReverse = bestPathReverse.getId().getSrc();
-		log.info("Path Computed - All ok");
-		// Now I have the path and I need to install it using the method pushRoute provided by ForwardingBase
-		super.pushRoute(bestPathDirect, pi.getMatch(), pi, pinSwitchDirect, null, cntx, false, OFFlowModCommand.ADD, false);
-		super.pushRoute(bestPathReverse, pi.getMatch(), pi, pinSwitchReverse, null, cntx, false, OFFlowModCommand.ADD, false);
-		return true;
-	}*/
-	
-	private boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
+
+	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
 		log.info("dening IPv4: {} - {} on switch "+sw.getId().toString()+"\n",
 				sourceIP.toString(), destinIP.toString());  
 		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
@@ -246,11 +216,17 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	public boolean delIntent(HostPair toDelete) {
 		System.out.print("delIntent Called\n");
-		for (HostPair i : intentsDB) {
+		for (Iterator<HostPair> iterator = intentsDB.iterator(); iterator.hasNext(); ) {
+            HostPair i = iterator.next();
+            if (i == toDelete) {
+                iterator.remove();
+            }
+        }
+		/*for (HostPair i : intentsDB) {
 			if (i.getHost1() == toDelete.getHost1() && i.getHost2() == toDelete.getHost2()) {
 				intentsDB.remove(i);
 			}
-		}
+		}*/
 		return true;
 	}
 	
