@@ -4,6 +4,7 @@ import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.MacAddress;
 
+
 public class HostPair {
 
 	protected MacAddress host1;
@@ -13,6 +14,7 @@ public class HostPair {
 	protected IPv4Address host2IP;
 	protected DatapathId sw2;
 	protected long timeout;
+	protected IntentState state;
 	
 	public MacAddress getHost1() {
 		return host1;
@@ -50,6 +52,18 @@ public class HostPair {
 		return timeout;
 	}
 	
+	public void setTimeout(long newTimeout) {
+		timeout = newTimeout;
+	}
+	
+	public IntentState getState() {
+		return state;
+	}
+	
+	public void setState(IntentState newState) {
+		state = newState;
+	}
+	
 	public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
 		host1 = hostA;
 		host2 = hostB;
@@ -58,6 +72,7 @@ public class HostPair {
 		sw2 = null;
 		host1IP=null;
 		host2IP=null;
+		state = IntentState.TO_SETUP;
 	}
 	
 	public HostPair(MacAddress hostA, MacAddress hostB) {
@@ -95,6 +110,7 @@ public class HostPair {
 			host1IP = IPv4Address.of(hostA); 
 			host2IP = IPv4Address.of(hostB);
 		}
+		state = IntentState.TO_SETUP;
 	}
 	
 	@Override

@@ -1,10 +1,6 @@
 package net.floodlightcontroller.unipi.intent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
 import org.projectfloodlight.openflow.protocol.OFFlowModCommand;
@@ -143,15 +139,20 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
-				//makeRoute(sw, sourceIP, destinIP, 1000, pi, cntx);
-				//return Command.CONTINUE;
 				
-				/* ERROR: decision is null
-				short timeout = (short)hp.getTimeout();
-				System.out.printf("Timeout: %d\n", timeout);
-				short timeout2 = 6000;
-				System.out.printf("Timeout: %d\n", timeout2);
-				decision.setHardTimeout(timeout2);*/
+				/* The setup of the timer is done only for the first packetIn
+				 * related to a particular intent. We recognize that it is the first
+				 * packetIn because the timeout of the intent is not 0:
+				 * after the setup of the timer the timeout is set to 0 in 
+				 * order to avoid another timeout setup.*/
+				if (hp.getTimeout()!=0) {
+					long timeout = hp.getTimeout();
+					hp.setTimeout(0);
+					Timer timer = new Timer();
+					TimerTask task = new TimeoutTask(hp, this);
+					timer.schedule(task, timeout);
+				}
+				
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
 		denyRoute(sw, sourceIP, destinIP, 1000);
@@ -162,7 +163,8 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	
 	private HostPair getIntentInfo(IPv4Address sourceIP, IPv4Address destIP) {
 		for (HostPair i : intentsDB) {
-			if (i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destIP.toString())) {
+			if ((i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destIP.toString()))
+					|| (i.getHost1IP().toString().equals(destIP.toString()) && i.getHost2IP().toString().equals(sourceIP.toString()))) {
 				return i;
 			}
 		}
@@ -264,3 +266,4 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	}
 	
 }
+
