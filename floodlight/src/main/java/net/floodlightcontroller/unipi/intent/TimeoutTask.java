@@ -26,8 +26,10 @@ public class TimeoutTask extends TimerTask {
 	}
 	
 	public void setSwitch(IOFSwitch sw) {
-		if(!isSwitch)
+		if(!isSwitch) {
 			targetSw = sw;
+			isSwitch = true;
+		}
 	}
 	
     public void run() {
