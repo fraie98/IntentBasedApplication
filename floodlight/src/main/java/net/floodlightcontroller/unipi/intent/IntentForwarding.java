@@ -139,16 +139,9 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
-				
-				/* The setup of the timer is done only for the first packetIn
-				 * related to a particular intent. */
-				if (hp.getState() == IntentState.TO_SETUP) {
-					long timeout = hp.getTimeout();
-					hp.setState(IntentState.TIMER_SETUP_DONE);
-					Timer timer = new Timer();
-					TimerTask task = new TimeoutTask(hp, sw, this);
-					timer.schedule(task, timeout);
-				}
+				/* It is necessary to say the switch to the timer handler
+				 * in order to deny the route when the intent expires*/
+				hp.getTimeoutTask().setSwitch(sw);	
 				
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
@@ -210,6 +203,13 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 			log.info(" Intent already present in Intents List");
 			return false;
 		}
+	
+		long timeout = newPair.getTimeout();
+		Timer timer = new Timer();
+		TimerTask task = new TimeoutTask(newPair, this);
+		newPair.setTimeoutTask((TimeoutTask)task);
+		timer.schedule(task, timeout);
+		
 		intentsDB.add(newPair);
 		return true;
 	}

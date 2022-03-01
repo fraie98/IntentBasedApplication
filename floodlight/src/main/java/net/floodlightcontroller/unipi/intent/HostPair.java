@@ -14,7 +14,7 @@ public class HostPair {
 	protected IPv4Address host2IP;
 	protected DatapathId sw2;
 	protected long timeout;
-	protected IntentState state;
+	protected TimeoutTask timeoutTask;
 	
 	public MacAddress getHost1() {
 		return host1;
@@ -56,12 +56,12 @@ public class HostPair {
 		timeout = newTimeout;
 	}
 	
-	public IntentState getState() {
-		return state;
+	public void setTimeoutTask(TimeoutTask newTimeoutTask) {
+		timeoutTask = newTimeoutTask;
 	}
 	
-	public void setState(IntentState newState) {
-		state = newState;
+	public TimeoutTask getTimeoutTask() {
+		return timeoutTask;
 	}
 	
 	public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
@@ -72,7 +72,6 @@ public class HostPair {
 		sw2 = null;
 		host1IP=null;
 		host2IP=null;
-		state = IntentState.TO_SETUP;
 	}
 	
 	public HostPair(MacAddress hostA, MacAddress hostB) {
@@ -110,7 +109,6 @@ public class HostPair {
 			host1IP = IPv4Address.of(hostA); 
 			host2IP = IPv4Address.of(hostB);
 		}
-		state = IntentState.TO_SETUP;
 	}
 	
 	@Override
