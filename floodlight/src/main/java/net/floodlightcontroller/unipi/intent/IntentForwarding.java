@@ -119,7 +119,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
     public Command processPacketInMessage(IOFSwitch sw, OFPacketIn pi, IRoutingDecision decision, FloodlightContext cntx) {
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx,
 				IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
-		
 		//OFPort inPort = OFMessageUtils.getInPort(pi);
 		IPacket pkt = eth.getPayload();
 		
@@ -131,6 +130,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		}
 		if(!(pkt instanceof IPv4))
 			return super.processPacketInMessage(sw, pi, decision, cntx);
+		
 		IPv4 ip_pkt = (IPv4) pkt;
 		IPv4Address sourceIP = ip_pkt.getSourceAddress();
 		IPv4Address destinIP = ip_pkt.getDestinationAddress();
@@ -145,8 +145,8 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
-		denyRoute(sw, sourceIP, destinIP, 1000);
-		denyRoute(sw, destinIP,sourceIP, 1000);
+		denyRoute(sw, sourceIP, destinIP, 5);
+		denyRoute(sw, destinIP,sourceIP, 5);
 		return Command.CONTINUE;
 		
 	}

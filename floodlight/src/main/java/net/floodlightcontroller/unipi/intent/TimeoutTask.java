@@ -35,8 +35,8 @@ public class TimeoutTask extends TimerTask {
     public void run() {
         System.out.println( " The intent has expired" );
         if(isSwitch) {
-        	f.denyRoute(targetSw, targetIntent.getHost1IP(), targetIntent.getHost2IP(), 1000);
-      		f.denyRoute(targetSw, targetIntent.getHost2IP(), targetIntent.getHost1IP(), 1000);
+        	f.denyRoute(targetSw, targetIntent.getHost1IP(), targetIntent.getHost2IP(), 5);
+      		f.denyRoute(targetSw, targetIntent.getHost2IP(), targetIntent.getHost1IP(), 5);
         }
         f.delIntent(targetIntent);
     }
