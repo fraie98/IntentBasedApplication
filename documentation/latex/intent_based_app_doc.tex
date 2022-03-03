@@ -149,6 +149,15 @@
 	\item The Destination
 	\item Intent Timeout
 	\end{itemize}
+
+	\noindent The possible API’s that we can use are:
+        \begin{itemize}
+        \item "/addNewIntent/json", that is used to insert new intent. This API gets from a JSON file two IPs (representing source and destination) and a timeout. This use the addNewIntent function of the IntentForwarding class that, first check if new intent is already presents, then in case it isn’t put it in intentDb that is an ArrayList of HostPair. Moreover, this function also set the timeout time of the pair.
+        \item "/delIntent/json", that takes from a JSON file two IPs and a timeout and removes the intent corresponding to them. To do this, it use the delIntent function of IntentForwarding, that iterates the intentDB list and removes the intent with IPs passed in through JSON.
+	\item "/getIntents/json", that is used to get all intents present in specific moment. It use the getIntents function of IntentForwarding that simply return intentDb.
+        \end{itemize}
+
+	
 	
 	\noindent Then the intent will be pushed in the network when the source host tries to send a packet to the destination host. When this happens a packetIn sending from the first switch that receives the packet will be sent to the controller and will be handled by the forwarding module seen in \ref{forwarding}
 	
