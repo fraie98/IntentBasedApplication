@@ -4,15 +4,17 @@ import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.MacAddress;
 
+import net.floodlightcontroller.core.IOFSwitch;
+
 
 public class HostPair {
 
 	//protected MacAddress host1;
 	protected IPv4Address host1IP;
-	protected DatapathId sw1;
+	protected IOFSwitch sw1;
 	//protected MacAddress host2;
 	protected IPv4Address host2IP;
-	protected DatapathId sw2;
+	protected IOFSwitch sw2;
 	protected long timeout;
 	protected TimeoutTask timeoutTask;
 	
@@ -25,6 +27,7 @@ public class HostPair {
 		timeout = timeoutToSet;
 		sw1 = null;
 		sw2 = null;
+		timeoutTask = null;
 	}
 	
 	public HostPair(IPv4Address hostA, IPv4Address hostB) {
@@ -38,32 +41,43 @@ public class HostPair {
 	/*public MacAddress getHost1() {
 		return host1;
 	}*/
+	
+	public void setHost1IP(IPv4Address host1ip) {
+		host1IP = host1ip;
+	}
 
 	public IPv4Address getHost1IP() {
 		return host1IP;
 	}
-
-	public DatapathId getSw1() {
+	
+	public void setSw1(IOFSwitch newSw1) {
+		if(sw1 == null)
+			sw1 = newSw1;
+	}
+	
+	public IOFSwitch getSw1() {
 		return sw1;
 	}
 	/*
 	public MacAddress getHost2() {
 		return host2;
 	}*/
-
-	public IPv4Address getHost2IP() {
-		return host2IP;
-	}
-
-	public void setHost1IP(IPv4Address host1ip) {
-		host1IP = host1ip;
-	}
-
+	
 	public void setHost2IP(IPv4Address host2ip) {
 		host2IP = host2ip;
 	}
 
-	public DatapathId getSw2() {
+	public IPv4Address getHost2IP() {
+		return host2IP;
+	}	
+	
+	public void setSw2(IOFSwitch newSw2) {
+		if(sw2 == null)
+			sw2 = newSw2;
+	}
+	
+
+	public IOFSwitch getSw2() {
 		return sw2;
 	}
 

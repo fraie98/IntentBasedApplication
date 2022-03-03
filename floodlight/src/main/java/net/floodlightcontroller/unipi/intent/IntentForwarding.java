@@ -144,10 +144,16 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
-				/* It is necessary to say the switch to the timer handler
-				 * in order to deny the route when the intent expires*/
-				hp.getTimeoutTask().setSwitch(sw);	
-				
+				/* It is necessary to register the switches (the first switch that
+				 * the packet sends by the sender encounters and the first switch
+				 * that the response encounters) to the intent DB so that the
+				 * timer handler will be able to deny the route when the intent expires.
+				 * Notice that only the first switch encountered will be set because
+				 * setSw permits the set only if the switch has not been set previously*/	
+				if(hp.getHost1IP().equals(sourceIP))
+					hp.setSw1(sw);
+				if(hp.getHost2IP().equals(sourceIP))
+					hp.setSw2(sw);
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
 		denyRoute(sw, sourceIP, destinIP);
