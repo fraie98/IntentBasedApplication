@@ -3,12 +3,10 @@ package net.floodlightcontroller.unipi.intent;
 import java.util.*;
 
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
-import org.projectfloodlight.openflow.protocol.OFFlowModCommand;
 import org.projectfloodlight.openflow.protocol.OFPacketIn;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
 import org.projectfloodlight.openflow.protocol.match.Match;
 import org.projectfloodlight.openflow.protocol.match.MatchField;
-import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.MacAddress;
@@ -36,9 +34,19 @@ import net.floodlightcontroller.routing.Path;
 
 
 
+
 public class IntentForwarding extends Forwarding  implements IFloodlightModule, IOFSwitchListener, ILinkDiscoveryListener,
 IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
-	
+	private final int DEFAULT_TIMEOUT=5;
+
+	protected int denyTimeout;
+	public int getDenyTimeout() {
+		return denyTimeout;
+	}
+
+	public void setDenyTimeout(int denyTimeout) {
+		this.denyTimeout = denyTimeout;
+	}
 	ArrayList<HostPair> intentsDB;
 	IRoutingService routingService;
 	ForwardingBase forwardingBase;
@@ -78,6 +86,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
 		intentsDB = new ArrayList<>();
 		routingService = context.getServiceImpl(IRoutingService.class);
+		denyTimeout=DEFAULT_TIMEOUT;
 		super.init(context);
 	}
 	
@@ -145,8 +154,8 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
-		denyRoute(sw, sourceIP, destinIP, 5);
-		denyRoute(sw, destinIP,sourceIP, 5);
+		denyRoute(sw, sourceIP, destinIP, denyTimeout);
+		denyRoute(sw, destinIP,sourceIP, denyTimeout);
 		return Command.CONTINUE;
 		
 	}
