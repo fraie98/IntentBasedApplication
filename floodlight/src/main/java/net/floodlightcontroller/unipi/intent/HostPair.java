@@ -7,18 +7,37 @@ import org.projectfloodlight.openflow.types.MacAddress;
 
 public class HostPair {
 
-	protected MacAddress host1;
+	//protected MacAddress host1;
 	protected IPv4Address host1IP;
 	protected DatapathId sw1;
-	protected MacAddress host2;
+	//protected MacAddress host2;
 	protected IPv4Address host2IP;
 	protected DatapathId sw2;
 	protected long timeout;
 	protected TimeoutTask timeoutTask;
 	
-	public MacAddress getHost1() {
-		return host1;
+
+	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
+		host1IP = hostA;
+		host2IP = hostB;
+		//host1 = (MacAddress)null;
+		//host2 = (MacAddress)null;
+		timeout = timeoutToSet;
+		sw1 = null;
+		sw2 = null;
 	}
+	
+	public HostPair(IPv4Address hostA, IPv4Address hostB) {
+		this(hostA, hostB, 0);
+	}
+	
+	public HostPair(String hostA, String hostB, long timeoutToSet) {
+		this(IPv4Address.of(hostA), IPv4Address.of(hostB), timeoutToSet);
+	}
+	
+	/*public MacAddress getHost1() {
+		return host1;
+	}*/
 
 	public IPv4Address getHost1IP() {
 		return host1IP;
@@ -27,10 +46,10 @@ public class HostPair {
 	public DatapathId getSw1() {
 		return sw1;
 	}
-
+	/*
 	public MacAddress getHost2() {
 		return host2;
-	}
+	}*/
 
 	public IPv4Address getHost2IP() {
 		return host2IP;
@@ -64,7 +83,7 @@ public class HostPair {
 		return timeoutTask;
 	}
 	
-	public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
+	/*public HostPair(MacAddress hostA, MacAddress hostB, long timeoutToSet) {
 		host1 = hostA;
 		host2 = hostB;
 		timeout = timeoutToSet;
@@ -80,36 +99,9 @@ public class HostPair {
 
 	public HostPair(String hostA, String hostB, long timeoutToSet) {
 		this(MacAddress.of(hostA), MacAddress.of(hostB), timeoutToSet );
-	}
-	public HostPair(IPv4Address hostA, IPv4Address hostB) {
-		this(hostA, hostB, 0);
-	}
-	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
-		this((MacAddress)null,(MacAddress)null,timeoutToSet);
-		host1IP=hostA;
-		host2IP=hostB;
-	}
+	}*/
 	
-	public HostPair(String hostA, String hostB, long timeoutToSet, boolean isMac) {
-		if (isMac) {
-			host1 = MacAddress.of(hostA);
-			host2 = MacAddress.of(hostB);
-			timeout = timeoutToSet;
-			sw1 = null;
-			sw2 = null;
-			host1IP=null;
-			host2IP=null;
-		}
-		else {
-			host1 = (MacAddress)null;
-			host2 = (MacAddress)null;
-			timeout = timeoutToSet;
-			sw1 = null;
-			sw2 = null;
-			host1IP = IPv4Address.of(hostA); 
-			host2IP = IPv4Address.of(hostB);
-		}
-	}
+	
 	
 	@Override
 	public boolean equals(Object c) {
@@ -120,8 +112,8 @@ public class HostPair {
         if (getClass() != c.getClass())
             return false;
 		HostPair cm = (HostPair) c;
-		// compare IPss
 		
+		// compare IPss
 		if(cm.host1IP!=null && cm.host2IP!=null && host1IP!=null && host2IP!=null) { 
 			if(cm.host1IP.equals(host1IP) && cm.host2IP.equals(host2IP))
 				return true;
@@ -130,12 +122,13 @@ public class HostPair {
 			return false;
 		}
 		// compare MACs
+		/*
 		if(cm.host1==null || cm.host2==null || this.host1==null || this.host2==null)
 			return false;
 		if(cm.host1.equals(this.host1) && cm.host2.equals(this.host2))
 			return true;
 		if(cm.host1.equals(this.host2) && cm.host2.equals(this.host1))
-			return true;
+			return true;*/
 		return false;
 	}
 }

@@ -113,15 +113,11 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 			return super.processPacketInMessage(sw, pi, d, cntx);
 		MacAddress targetMAC = arp.getTargetHardwareAddress();	// for gratuitous arp or gossip resolving
 		MacAddress senderMAC = arp.getSenderHardwareAddress();
-		hp = new HostPair(senderMAC, targetMAC);
-		if(intentsDB.contains(hp)) 
-			return super.processPacketInMessage(sw, pi, d, cntx);
-		log.info("dening ARP: {} - {} on switch "+sw.getId().toString()+"\n",
+		log.info("dening ARP: {} - {} on switch " + sw.getId().toString() + "\n",
 				senderMAC.toString(), targetMAC.toString());  
-		denyArp(sw, senderMAC, targetMAC,200);
-		denyArp(sw, targetMAC, senderMAC,200);
+		//denyArp(sw, senderMAC, targetMAC,200);
+		//denyArp(sw, targetMAC, senderMAC,200);
 		return Command.STOP;
-		
 	}
 	
 	@Override
@@ -144,7 +140,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		IPv4Address sourceIP = ip_pkt.getSourceAddress();
 		IPv4Address destinIP = ip_pkt.getDestinationAddress();
 		
-		HostPair hp = getIntentInfo(sourceIP, destinIP);
+		HostPair hp = getIntentFromDB(sourceIP, destinIP);
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
@@ -154,23 +150,22 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				
 				return super.processPacketInMessage(sw, pi, decision, cntx);	
 		}
-		denyRoute(sw, sourceIP, destinIP, denyTimeout);
-		denyRoute(sw, destinIP,sourceIP, denyTimeout);
+		denyRoute(sw, sourceIP, destinIP);
+		denyRoute(sw, destinIP,sourceIP);
 		return Command.CONTINUE;
 		
 	}
 	
-	private HostPair getIntentInfo(IPv4Address sourceIP, IPv4Address destIP) {
+	private HostPair getIntentFromDB(IPv4Address sourceIP, IPv4Address destIP) {
 		for (HostPair i : intentsDB) {
-			if ((i.getHost1IP().toString().equals(sourceIP.toString()) && i.getHost2IP().toString().equals(destIP.toString()))
-					|| (i.getHost1IP().toString().equals(destIP.toString()) && i.getHost2IP().toString().equals(sourceIP.toString()))) {
+			if((new HostPair(sourceIP, destIP)).equals(i)) {
 				return i;
 			}
 		}
 		return null;
 	}
 
-	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP, int timeout) {
+	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP) {
 		log.info("dening IPv4: {} - {} on switch "+sw.getId().toString()+"\n",
 				sourceIP.toString(), destinIP.toString());  
 		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
@@ -183,13 +178,15 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 							;
 		fmb.setActions(actions)
 		.setMatch(mb1.build())
-		.setHardTimeout(timeout)
+		.setHardTimeout(denyTimeout)
 		.setPriority(10000);
 		sw.write(fmb.build());
 		return true;
 	}
 	
 	private boolean denyArp(IOFSwitch sw, MacAddress sourceMAC, MacAddress destinMAC, int timeout) {
+		log.info("dening ARP: {} - {} on switch " + sw.getId().toString() + "\n",
+				sourceMAC.toString(), destinMAC.toString());  
 		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
 		List<OFAction> actions = new ArrayList<OFAction>(); // no actions = drop
 		Match.Builder mb1 = sw.getOFFactory().buildMatch();

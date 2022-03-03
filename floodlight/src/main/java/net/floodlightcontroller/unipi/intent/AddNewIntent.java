@@ -24,18 +24,16 @@ public class AddNewIntent extends ServerResource {
 		String hostA = new String();
 		String hostB = new String();
 		long timeout = 0;
-		boolean isMac = false;
 		
 		try {
 			JsonNode root = mapper.readTree(json);
-			hostA = root.get("host1").asText();
-			hostB = root.get("host2").asText();
+			hostA = root.get("host1_IP").asText();
+			hostB = root.get("host2_IP").asText();
 			timeout = Integer.parseInt(root.get("timeout").asText());
-			isMac = root.get("isMac").asBoolean();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		newPair = new HostPair(hostA, hostB, timeout, isMac);
+		newPair = new HostPair(hostA, hostB, timeout);
 	    IIntentForwarding intentForw = (IIntentForwarding) getContext().getAttributes().get(IIntentForwarding.class.getCanonicalName());
 	    return intentForw.addNewIntent(newPair);
 	}

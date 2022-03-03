@@ -24,8 +24,8 @@ public class DelIntent extends ServerResource {
 		
 		try {
 			JsonNode root = mapper.readTree(json);
-			hostA = root.get("host1").asText();
-			hostB = root.get("host2").asText();
+			hostA = root.get("host1_IP").asText();
+			hostB = root.get("host2_IP").asText();
 			timeout = Integer.parseInt(root.get("timeout").asText());
 		} catch (IOException e) {
 			e.printStackTrace();
