@@ -114,9 +114,12 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		MacAddress targetMAC = arp.getTargetHardwareAddress();	// for gratuitous arp or gossip resolving
 		MacAddress senderMAC = arp.getSenderHardwareAddress();
 		log.info("dening ARP: {} - {} on switch " + sw.getId().toString() + "\n",
-				senderMAC.toString(), targetMAC.toString());  
-		//denyArp(sw, senderMAC, targetMAC,200);
-		//denyArp(sw, targetMAC, senderMAC,200);
+				senderMAC.toString(), targetMAC.toString());
+		
+		if(!targetMAC.equals(MacAddress.of("00:00:00:00:00:00"))) {
+			denyArp(sw, senderMAC, targetMAC);
+			denyArp(sw, targetMAC, senderMAC);
+		}
 		return Command.STOP;
 	}
 	
@@ -140,7 +143,11 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		IPv4Address sourceIP = ip_pkt.getSourceAddress();
 		IPv4Address destinIP = ip_pkt.getDestinationAddress();
 		
-		HostPair hp = getIntentFromDB(sourceIP, destinIP);
+		HostPair hp = null;
+		int hpIndex = intentsDB.indexOf(new HostPair(sourceIP, destinIP));
+		if (hpIndex != -1)
+			hp = intentsDB.get(hpIndex);
+		
 		if(hp != null && intentsDB.contains(hp)) {
 				System.out.printf("allowing: %s - %s on switch %s \n",
 						sourceIP.toString(), destinIP.toString(), sw.getId());
@@ -160,15 +167,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		denyRoute(sw, destinIP,sourceIP);
 		return Command.CONTINUE;
 		
-	}
-	
-	private HostPair getIntentFromDB(IPv4Address sourceIP, IPv4Address destIP) {
-		for (HostPair i : intentsDB) {
-			if((new HostPair(sourceIP, destIP)).equals(i)) {
-				return i;
-			}
-		}
-		return null;
 	}
 
 	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP) {
@@ -190,7 +188,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		return true;
 	}
 	
-	private boolean denyArp(IOFSwitch sw, MacAddress sourceMAC, MacAddress destinMAC, int timeout) {
+	private boolean denyArp(IOFSwitch sw, MacAddress sourceMAC, MacAddress destinMAC) {
 		log.info("dening ARP: {} - {} on switch " + sw.getId().toString() + "\n",
 				sourceMAC.toString(), destinMAC.toString());  
 		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
@@ -203,7 +201,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 							;
 		fmb.setActions(actions)
 		.setMatch(mb1.build())
-		.setHardTimeout(timeout)
+		.setHardTimeout(denyTimeout)
 		.setPriority(10000);
 		sw.write(fmb.build());
 		return true;
