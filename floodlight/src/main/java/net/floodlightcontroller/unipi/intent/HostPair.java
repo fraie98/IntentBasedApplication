@@ -12,7 +12,6 @@ public class HostPair {
 	protected IPv4Address host2IP;
 	protected IOFSwitch sw2;
 	protected long timeout;
-	protected TimeoutTask timeoutTask;
 	
 
 	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
@@ -21,7 +20,6 @@ public class HostPair {
 		timeout = timeoutToSet;
 		sw1 = null;
 		sw2 = null;
-		timeoutTask = null;
 	}
 	
 	public HostPair(IPv4Address hostA, IPv4Address hostB) {
@@ -72,14 +70,6 @@ public class HostPair {
 	
 	public void setTimeout(long newTimeout) {
 		timeout = newTimeout;
-	}
-	
-	public void setTimeoutTask(TimeoutTask newTimeoutTask) {
-		timeoutTask = newTimeoutTask;
-	}
-	
-	public TimeoutTask getTimeoutTask() {
-		return timeoutTask;
 	}
 	
 	@Override
