@@ -11,7 +11,6 @@ import net.floodlightcontroller.routing.Path;
 public interface IIntentForwarding extends IFloodlightService{
 	public boolean addNewIntent(HostPair newPair);
 	public boolean delIntent(HostPair toDelete);
-	public boolean installBackupPath(Path backupPath); // called by LinkFailureHandler
 	public Iterable<HostPair> getIntents();
 	public String getName();
 	public int getDenyTimeout();

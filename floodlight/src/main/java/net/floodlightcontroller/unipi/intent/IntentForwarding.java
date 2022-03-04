@@ -37,9 +37,11 @@ import net.floodlightcontroller.routing.Path;
 
 public class IntentForwarding extends Forwarding  implements IFloodlightModule, IOFSwitchListener, ILinkDiscoveryListener,
 IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
+	
 	private final int DEFAULT_TIMEOUT=5;
-
 	protected int denyTimeout;
+	ArrayList<HostPair> intentsDB;
+	
 	public int getDenyTimeout() {
 		return denyTimeout;
 	}
@@ -47,9 +49,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	public void setDenyTimeout(int denyTimeout) {
 		this.denyTimeout = denyTimeout;
 	}
-	ArrayList<HostPair> intentsDB;
-	IRoutingService routingService;
-	ForwardingBase forwardingBase;
 	
 	@Override
 	public String getName() {
@@ -85,8 +84,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	@Override
 	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
 		intentsDB = new ArrayList<>();
-		routingService = context.getServiceImpl(IRoutingService.class);
-		denyTimeout=DEFAULT_TIMEOUT;
+		denyTimeout = DEFAULT_TIMEOUT;
 		super.init(context);
 	}
 	
@@ -172,18 +170,18 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP) {
 		log.info("dening IPv4: {} - {} on switch "+sw.getId().toString()+"\n",
 				sourceIP.toString(), destinIP.toString());  
-		OFFlowMod.Builder fmb =sw.getOFFactory().buildFlowAdd();
+		OFFlowMod.Builder fmb = sw.getOFFactory().buildFlowAdd();
 		List<OFAction> actions = new ArrayList<OFAction>(); // no actions = drop
 		Match.Builder mb1 = sw.getOFFactory().buildMatch();
 		
 		mb1.setExact(MatchField.ETH_TYPE, EthType.IPv4)
 				.setExact(MatchField.IPV4_SRC, sourceIP)
-				.setExact(MatchField.IPV4_DST, destinIP)
-							;
+				.setExact(MatchField.IPV4_DST, destinIP);
+		
 		fmb.setActions(actions)
-		.setMatch(mb1.build())
-		.setHardTimeout(denyTimeout)
-		.setPriority(10000);
+			.setMatch(mb1.build())
+			.setHardTimeout(denyTimeout)
+			.setPriority(10000);
 		sw.write(fmb.build());
 		return true;
 	}
@@ -200,9 +198,9 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				.setExact(MatchField.ARP_THA, destinMAC)
 							;
 		fmb.setActions(actions)
-		.setMatch(mb1.build())
-		.setHardTimeout(denyTimeout)
-		.setPriority(10000);
+			.setMatch(mb1.build())
+			.setHardTimeout(denyTimeout)
+			.setPriority(10000);
 		sw.write(fmb.build());
 		return true;
 	}
@@ -217,7 +215,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		long timeout = newPair.getTimeout();
 		Timer timer = new Timer();
 		TimerTask task = new TimeoutTask(newPair, this);
-		newPair.setTimeoutTask((TimeoutTask)task);
 		timer.schedule(task, timeout);
 		
 		intentsDB.add(newPair);
@@ -232,17 +229,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
                 iterator.remove();
             }
         }
-		/*for (HostPair i : intentsDB) {
-			if (i.getHost1() == toDelete.getHost1() && i.getHost2() == toDelete.getHost2()) {
-				intentsDB.remove(i);
-			}
-		}*/
-		return true;
-	}
-	
-	public boolean installBackupPath(Path backupPath) {
-		System.out.print("AddNewIntent Called");
-		// TODO
 		return true;
 	}
 
