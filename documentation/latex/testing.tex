@@ -7,8 +7,9 @@ which is able to act like an HTTP client.
 We want to simumlate a tipical data center scenario with a single LAN, implemented in a \textit{Spine-Leaf} topology. This configuration
 is widely used thanks to it's easy scalability and sufficent redundancy.
 \begin{figure}[h]
-    \caption{an example of \textit{spine-leaf} topology}
+    \caption{example of \textit{spine-leaf} topology}
     \includegraphics[width=0.90\textwidth]{img/spine_leaf.pdf}
 \end{figure}
 
-
+Using \texttt{mininet}, we can also simulate an episode of link failure, in order to test the system behaviour in this specific case. The system is able to
+recompute a functional path between two host and use it to forward packets.
