@@ -29,3 +29,8 @@ floodlight/target
 
 .project
 .vscode/
+
+#latex cahe
+.aux
+.toc
+.synctex.gx
