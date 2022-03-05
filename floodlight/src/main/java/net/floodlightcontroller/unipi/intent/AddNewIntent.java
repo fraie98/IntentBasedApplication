@@ -1,8 +1,5 @@
 package net.floodlightcontroller.unipi.intent;
 
-import java.io.IOException;
-
-import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 
@@ -29,8 +26,8 @@ public class AddNewIntent extends ServerResource {
 			JsonNode root = mapper.readTree(json);
 			hostA = root.get("host1_IP").asText();
 			hostB = root.get("host2_IP").asText();
-			timeout = Integer.parseInt(root.get("timeout").asText());
-		} catch (IOException e) {
+			timeout =root.get("timeout").asInt();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		newPair = new HostPair(hostA, hostB, timeout);

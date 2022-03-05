@@ -30,6 +30,10 @@ public class HostPair {
 		this(IPv4Address.of(hostA), IPv4Address.of(hostB), timeoutToSet);
 	}
 	
+	public HostPair(String hostA, String hostB) {
+		this(IPv4Address.of(hostA), IPv4Address.of(hostB), 0);
+	}
+
 	public void setHost1IP(IPv4Address host1ip) {
 		host1IP = host1ip;
 	}
