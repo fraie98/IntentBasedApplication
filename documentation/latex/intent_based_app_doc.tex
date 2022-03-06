@@ -251,32 +251,33 @@
 
 \noindent The rules to avoid communication between the MACs addresses carried inside the ARP packet are installed only if that packet is an ARP response, in that case the target MAC address is not 00:00:00:00:00:00. In fact installing a rule that deny to forward an ARP messagge from a certain mac X to 00:00:00:00:00:00 means deny X to runs the ARP protocol because for each ARP request the target mac is 00:00:00:00:00:00 i.e. unspecified mac. Viceversa deny an ARP from 00:00:00:00:00:00 to any mac has no sense.	
 	
-	\section{REST API For Establishing An Intent}
-	\noindent When the hostA wants to send an intent to make a connection with hostB it has to use the REST API. This API is provided by the classes: IntentWebRoutable, AddNewIntent, DelIntent and GetIntent; these classes use methods from IntentForwarding.
+	\section{REST API}
+	\noindent To establishing new intent between hosts and in general to manage them we have defined some APIs. All paths of these APIs are defined in the IntentWebRoutable class and all of them use method from IntentForwarding.
 	
-	\noindent When the REST API receives the intent, it establishes it inserting an entry in a dedicated data structure where it is indicated:
-	\begin{itemize}
-	\item The Source
-	\item The Destination
-	\item Intent Timeout
-	\end{itemize}
+	\subsection{Add new intent}
+	\noindent Thanks to "/addNewIntent/json" API we can insert a new intent to allow communications between two hosts. This API use the AddNewIntent class that gets from a JSON file two IPs (representing source and destination) and a timeout and store it in a new HostPair object. Then use the addNewIntent function of the IntentForwarding class that, first check if new intent is already presents, then in case it isn’t put it in intentDb, that is an ArrayList of HostPair. Moreover, this function also set the timeout time for the pair expiration.
+	
+	\subsection{Delete an intent}
+	\noindent Usingn"/delIntent/json" API we can delete an existing intent. This API use the DelIntent class that takes from a JSON file two IPs and create an HostPair object. Since we need only the Ips representing hosts, HostPair is created without pass the time of the intent (so is set automatically to 0 by HostPair). Then it uses the delIntent function of IntentForwarding, that iterates the intentDB list and removes the intent with IPs passed through JSON. Moreover, this function uses also the denyRoute (explained before) to install routes both in switch1 and switch2 to deny communications between the two hosts.
+        
+        \subsection{Get intents}
+        \noindent "/getIntents/json" API is used to retrieve all intents in a certain moment. It uses the GetIntents class that thanks to the getIntent function of IntentForwarding, it gets a list of HostPair (out intents) and return a list of JSON object representing them.
 
-	\noindent The possible API’s that we can use are:
-        \begin{itemize}
-        \item "/addNewIntent/json", that is used to insert new intent. This API gets from a JSON file two IPs (representing source and destination) and a timeout. This use the addNewIntent function of the IntentForwarding class that, first check if new intent is already presents, then in case it isn’t put it in intentDb that is an ArrayList of HostPair. Moreover, this function also set the timeout time of the pair.
-        \item "/delIntent/json", that takes from a JSON file two IPs and a timeout and removes the intent corresponding to them. To do this, it use the delIntent function of IntentForwarding, that iterates the intentDB list and removes the intent with IPs passed in through JSON.
-	\item "/getIntents/json", that is used to get all intents present in specific moment. It use the getIntents function of IntentForwarding that simply return intentDb.
-        \end{itemize}
+	\subsection{Manage timeout of deny}
+        \noindent "/ManageTimeout/json" API allow us to get or change (according to the fact that we are doing a get or a post request) the time that a rule to deny communication between hosts is valid. This use the ManageTimeout class that use getDenyTimeout and setDenyTimeout functions of IntentForwarding to get or change the timeout time of rules respectively.
 
-	
-	
-	\noindent Then the intent will be pushed in the network when the source host tries to send a packet to the destination host. When this happens a packetIn sending from the first switch that receives the packet will be sent to the controller and will be handled by the forwarding module seen in \ref{forwarding}
 	
 	\section{Responsiveness To Link Failures \& Topology Changes}
-	To be responsiveness to topology changes we can exploit the ITopologyListener inteface. In fact in the Floodligh documentation for the TopologyService it is written: \textit{"All the information about the current topology is stored in an immutable data structure called the topology instance. If there is any change in the topology, a new instance is created and the topology changed notification message is called. If other modules want to listen for changes in topology they can implement the ITopologyListener interface."}\footnote{https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/1343623/TopologyService+Dev}.
+	The responsiveness of the topology is reached thanks to the ITopologyListener inteface. In fact in the Floodligh documentation for the TopologyService it is written: \textit{"All the information about the current topology is stored in an immutable data structure called the topology instance. If there is any change in the topology, a new instance is created and the topology changed notification message is called. If other modules want to listen for changes in topology they can implement the ITopologyListener interface."}\footnote{https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/1343623/TopologyService+Dev}.
 	
-	\noindent Thus we can implement a class that implements ITopologyListener and that each time a topology change arrives it recompute the paths of intent involved in the topology change (i.e. the ones that has a link which doesn't work anymore). To do so we can use the TopologyInstance (updated before sending the notification message that the topology has changed) to understand which intent are involved in the topology change.
+	\noindent According to this we know that Floodlight handle automatically link failures and also topology changes. To do this it exploits two main techniques:
 	
+	\begin{itemize}
+        \item Every time arrives a packet of which its path is unknown, a new path is computed and is taken up for 5 seconds. If in this time no packets follow this path, this rule is deleted.
+
+	\item Every time that a link failure is happened, a new path is computed.
+	\end{itemize}
+
 	\chapter{Testing}
 	\include{testing.tex}
 \end{document}
