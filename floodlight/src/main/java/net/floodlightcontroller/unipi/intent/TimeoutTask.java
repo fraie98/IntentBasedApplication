@@ -4,14 +4,13 @@ import java.util.TimerTask;
 
 public class TimeoutTask extends TimerTask {
 	HostPair targetIntent;
-	IntentForwarding f;
+	IIntentForwarding f;
 
 	
-	public TimeoutTask(HostPair intent, IntentForwarding fw) {
+	public TimeoutTask(HostPair intent, IIntentForwarding fw) {
 		targetIntent = intent;
 		f = fw;
-	}
-	
+	}	
     public void run() {
         System.out.println( " The intent has expired" );
       	f.delIntent(targetIntent);

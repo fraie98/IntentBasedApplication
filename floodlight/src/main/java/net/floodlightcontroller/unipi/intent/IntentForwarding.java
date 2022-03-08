@@ -78,7 +78,6 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 				new ArrayList<Class<? extends IFloodlightService>>();
 		l.add(IFloodlightProviderService.class);
 		l.add(IRestApiService.class);
-		l.add(IRoutingService.class);
 		return l;
 	}
 
@@ -96,7 +95,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 	    restApiService.addRestletRoutable(new IntentWebRoutable());
 	}
 	
-	public Command handleARP(IOFSwitch sw, OFPacketIn pi, IRoutingDecision d, FloodlightContext cntx) {
+	private Command handleARP(IOFSwitch sw, OFPacketIn pi, IRoutingDecision d, FloodlightContext cntx) {
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx,
 				IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
 		IPacket pkt = eth.getPayload();
@@ -173,7 +172,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		
 	}
 
-	public boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP) {
+	private boolean denyRoute(IOFSwitch sw, IPv4Address sourceIP, IPv4Address destinIP) {
 		log.info("dening IPv4: {} - {} on switch "+sw.getId().toString()+"\n",
 				sourceIP.toString(), destinIP.toString());  
 		OFFlowMod.Builder fmb = sw.getOFFactory().buildFlowModify();
