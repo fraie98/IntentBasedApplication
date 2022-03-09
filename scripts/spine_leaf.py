@@ -26,7 +26,7 @@ class dcSpineLeafTopo(Topo):
         switchBw=(hostBw*n)//oRatio
         self.k = k
         self.l = l
-        hierarchy=1
+        hierarchy=1 # NECESSARY! 1st digit of switch name is used by floodlight  
         for i in irange(1, k):
             spineSwitch = self.addSwitch('spine%s%s' % (hierarchy,i))
             spineList.append(spineSwitch)
