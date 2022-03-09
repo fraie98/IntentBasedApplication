@@ -1,7 +1,6 @@
 package net.floodlightcontroller.unipi.intent;
 
 import net.floodlightcontroller.core.module.IFloodlightService;
-import net.floodlightcontroller.routing.Path;
 
 /**
  * This interface exposes the methods that can be called

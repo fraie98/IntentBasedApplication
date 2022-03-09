@@ -7,7 +7,6 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 import net.floodlightcontroller.core.types.JsonObjectWrapper;
-import net.floodlightcontroller.forwarding.Forwarding;
 
 public class GetServerInfo extends ServerResource {
 	
