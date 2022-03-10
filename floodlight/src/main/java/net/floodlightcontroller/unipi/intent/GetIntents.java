@@ -17,10 +17,6 @@ public class GetIntents extends ServerResource {
 			ObjectMapper mapper = new ObjectMapper();
 			for (HostPair i : hostPairs) {
 				ObjectNode pair = mapper.createObjectNode();
-				/*if(i.getHost1() != null)
-					pair.put("host1", i.getHost1().toString());
-				if(i.getHost2() != null)
-					pair.put("host2", i.getHost2().toString());*/
 				pair.put("timeout", i.getTimeout());
 				if(i.getHost1IP() != null)
 					pair.put("host1 IPv4", i.getHost1IP().toString());

@@ -16,7 +16,7 @@ from time import sleep
 from spine_leaf import dcSpineLeafTopo
 from random import seed
 from random import randint
-import matplotlib.pyplot as pl
+#import matplotlib.pyplot as pl
 
 def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     CONTROLLER_IP="127.0.0.1"
@@ -80,7 +80,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
 	    hostName='h%s%s' % (i,j)
             net.getNodeByName(hostName).sendCmd(  # non-blocking call
 	        'ping',  "-c "+str(N),dest[counter-1], 
-    	        '1> /tmp/'+hostName+'out 2>/tmp/'+hostName+'.err &' ) # save results in temporary files
+    	        '1> results/'+hostName+'.out 2>results/'+hostName+'.err &' ) # save results in temporary files
             if counter==N_HOSTS_TO_TEST:
                 exit=True
                 break
@@ -93,7 +93,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
 
     somma=0
     hostName=HOST_TESTED
-    f = open("/tmp/"+hostName+"out", "r")
+    f = open("results/"+hostName+".out", "r")
     for x in f:
         if counter==1:
             continue

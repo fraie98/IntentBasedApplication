@@ -229,12 +229,7 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		System.out.print("delIntent Called\n");
 		if(!intentsDB.remove(toDelete))
 			return false;
-		/*for (Iterator<HostPair> iterator = intentsDB.iterator(); iterator.hasNext(); ) {
-            HostPair i = iterator.next();
-            if (i == toDelete) {
-            	 iterator.remove();
-            }
-        }*/
+		
 		if(toDelete.getSw1() != null) {
       		System.out.printf(" Installing rule for denying IPv4 on switch %s\n", toDelete.getSw1().getId());
       		denyRoute(toDelete.getSw1(), toDelete.getHost1IP(), toDelete.getHost2IP());
