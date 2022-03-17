@@ -225,6 +225,19 @@ IRoutingDecisionChangedListener, IGatewayService, IIntentForwarding{
 		return true;
 	}
 	
+	public boolean delAllIntents() {
+		/* Notice that I am deleting elements from an array while I am cycle
+		 * through it (a for or a foreach will not work).
+		 * For this reason I delete always the first element until there is 
+		 * an element in the array */
+		while(intentsDB.size()!=0) {
+			boolean ret = delIntent(intentsDB.get(0));
+			if(!ret)
+				return false;
+		}
+		return true;
+	}
+	
 	public boolean delIntent(HostPair toDelete) {
 		System.out.print("delIntent Called\n");
 		if(!intentsDB.remove(toDelete))

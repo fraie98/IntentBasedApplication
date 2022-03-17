@@ -10,6 +10,7 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 public interface IIntentForwarding extends IFloodlightService{
 	public boolean addNewIntent(HostPair newPair);
 	public boolean delIntent(HostPair toDelete);
+	public boolean delAllIntents();
 	public Iterable<HostPair> getIntents();
 	public String getName();
 	public int getDenyTimeout();

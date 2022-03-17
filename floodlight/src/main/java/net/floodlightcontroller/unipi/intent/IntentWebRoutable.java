@@ -32,6 +32,7 @@ public class IntentWebRoutable implements RestletRoutable {
         router.attach("/addNewIntent/json", AddNewIntent.class);
         router.attach("/getIntents/json", GetIntents.class);
         router.attach("/delIntent/json", DelIntent.class);
+        router.attach("/deleteAllIntents/json", DeleteAllIntents.class);
         router.attach("/ManageTimeout/json", ManageTimeout.class);
         return router;
     }

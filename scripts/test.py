@@ -100,7 +100,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
         if "time" in x and "ttl" in x:
             a=x.split(" ")
             b=a[6].split("=")
-            somma+=float(b[1])
+	    somma+=float(b[1])
     avg=somma/N
 
     return avg
