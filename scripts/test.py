@@ -80,7 +80,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
 	    hostName='h%s%s' % (i,j)
             net.getNodeByName(hostName).sendCmd(  # non-blocking call
 	        'ping',  "-c "+str(N),dest[counter-1], 
-    	        '1> results/'+hostName+'.out 2>results/'+hostName+'.err &' ) # save results in temporary files
+    	        '1> results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.out 2>results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.err &' ) # save results in temporary files
             if counter==N_HOSTS_TO_TEST:
                 exit=True
                 break
@@ -91,25 +91,78 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     CLI( net )
     net.stop()
 
-    somma=0
     hostName=HOST_TESTED
-    f = open("results/"+hostName+".out", "r")
-    for x in f:
-        if counter==1:
-            continue
-        if "time" in x and "ttl" in x:
-            a=x.split(" ")
-            b=a[6].split("=")
-	    somma+=float(b[1])
-    avg=somma/N
+    avg=[]
+
+    # compiute avg without first ping
+    for h in range(N_HOSTS_TO_TEST):
+        somma=0
+        n_ping_contati=0
+        f = open("results/"+hostName[h]+'_ping_'+str(N_HOSTS_TO_TEST)+".out", "r")
+        for x in f:
+            #if counter==1:
+                #continue
+            if "time" in x and "ttl" in x:
+                if "seq=1 " in x:
+                    continue
+                if "Destination Host Unreachable" in x:
+                    continue
+                a=x.split(" ")
+                b=a[6].split("=")
+	        somma+=float(b[1])
+                n_ping_contati=n_ping_contati+1
+        avg.append(somma/(n_ping_contati))
+
+    # compiute avg with first ping
+    for h in range(N_HOSTS_TO_TEST):
+        somma=0
+        n_ping_contati=0
+        f = open("results/"+hostName[h]+'_ping_'+str(N_HOSTS_TO_TEST)+".out", "r")
+        for x in f:
+            #if counter==1:
+               #continue
+            if "time" in x and "ttl" in x:
+                if "Destination Host Unreachable" in x:
+                    continue
+                a=x.split(" ")
+                b=a[6].split("=")
+                somma+=float(b[1])
+                n_ping_contati=n_ping_contati+1
+        avg.append(somma/(n_ping_contati))
 
     return avg
 
 if __name__ == "__main__":
-    host="h11"
-    avg=[]
-    avg.append(test(2,3,4,1,10,host))
-    avg.append(test(2,3,4,4,10,host))
-    avg.append(test(2,3,4,8,10,host))
-    avg.append(test(2,3,4,12,10,host))
-    print avg
+    hosts=["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
+
+    avg=test(2,3,4,1,10,hosts)
+    avg_1_complete=avg[0]
+    avg_1_no_first=avg[1]
+
+    avg=test(2,3,4,4,10,hosts)
+    avg_4_complete=avg[:4]
+    avg_4_no_first=avg[4:]
+
+    avg=test(2,3,4,8,10,hosts)
+    avg_8_complete=avg[:8]
+    avg_8_no_first=avg[8:]
+
+    avg=test(2,3,4,12,10,hosts)
+    avg_12_complete=avg[:12]
+    avg_12_no_first=avg[12:]
+
+    print "-- 1 ping --"
+    print avg_1_complete
+    print avg_1_no_first
+
+    print "-- 4 ping --"
+    print avg_4_complete
+    print avg_4_no_first
+
+    print "-- 8 ping --"
+    print avg_8_complete
+    print avg_8_no_first
+
+    print "-- 12 ping --"
+    print avg_12_complete
+    print avg_12_no_first
