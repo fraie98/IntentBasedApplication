@@ -16,7 +16,8 @@ from time import sleep
 from spine_leaf import dcSpineLeafTopo
 from random import seed
 from random import randint
-#import matplotlib.pyplot as pl
+import matplotlib.pyplot as plt
+import numpy as np
 
 def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     CONTROLLER_IP="127.0.0.1"
@@ -70,7 +71,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     print "getting intents list"
     r=requests.get("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/getIntents/json")
     print r.text
-    sleep(5)
+    sleep(10)
     # test ping functionality for all hosts at the same time
     counter=0
     for i in range(1,LEAFS+1):
@@ -111,7 +112,10 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
                 b=a[6].split("=")
 	        somma+=float(b[1])
                 n_ping_contati=n_ping_contati+1
-        avg.append(somma/(n_ping_contati))
+        if n_ping_contati==0:
+            avg.append(0)
+        else:
+            avg.append(somma/(n_ping_contati))
 
     # compiute avg with first ping
     for h in range(N_HOSTS_TO_TEST):
@@ -128,28 +132,42 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
                 b=a[6].split("=")
                 somma+=float(b[1])
                 n_ping_contati=n_ping_contati+1
-        avg.append(somma/(n_ping_contati))
+        if n_ping_contati==0:
+            avg.append(0)
+        else:
+            avg.append(somma/(n_ping_contati))
 
     return avg
 
 if __name__ == "__main__":
+
     hosts=["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
+    h11_values_no_first=[]
+    h11_values_complete=[]
 
     avg=test(2,3,4,1,10,hosts)
-    avg_1_complete=avg[0]
-    avg_1_no_first=avg[1]
+    avg_1_complete=avg[1]
+    avg_1_no_first=avg[0]
+    h11_values_no_first.append(avg_1_no_first)
+    h11_values_complete.append(avg_1_complete)
 
     avg=test(2,3,4,4,10,hosts)
-    avg_4_complete=avg[:4]
-    avg_4_no_first=avg[4:]
+    avg_4_complete=avg[4:]
+    avg_4_no_first=avg[:4]
+    h11_values_no_first.append(avg_4_no_first[0])
+    h11_values_complete.append(avg_4_complete[0])
 
     avg=test(2,3,4,8,10,hosts)
-    avg_8_complete=avg[:8]
-    avg_8_no_first=avg[8:]
+    avg_8_complete=avg[8:]
+    avg_8_no_first=avg[:8]
+    h11_values_no_first.append(avg_8_no_first[0])
+    h11_values_complete.append(avg_8_complete[0])
 
     avg=test(2,3,4,12,10,hosts)
-    avg_12_complete=avg[:12]
-    avg_12_no_first=avg[12:]
+    avg_12_complete=avg[12:]
+    avg_12_no_first=avg[:12]
+    h11_values_no_first.append(avg_12_no_first[0])
+    h11_values_complete.append(avg_12_complete[0])
 
     print "-- 1 ping --"
     print avg_1_complete
@@ -166,3 +184,37 @@ if __name__ == "__main__":
     print "-- 12 ping --"
     print avg_12_complete
     print avg_12_no_first
+
+    print "-- plots host mean time --"
+    name_new=[]
+    for i in range(1,13,1):
+        name_new.append("host"+str(i))
+
+    x = np.arange(len(name_new))
+    width = 0.35
+    fig, ax = plt.subplots(figsize=(15,10))
+    ax.bar(x - width/2, avg_12_no_first, width, label='No first',data=name_new)
+    ax.bar(x + width/2, avg_12_complete, width, label='Complete',data=name_new)
+    ax.set_ylabel('Time')
+    ax.set_title('Mean time with and without first ping')
+    ax.set_xticks(x)
+    ax.set_xticklabels(name_new)
+    ax.legend()
+    fig.tight_layout()
+    plt.show()
+
+    print "-- plots h11 mean time --"
+    colors1=['royalblue','orange','tomato','limegreen']
+    colors2=['darkblue','darkorange','firebrick','darkgreen']
+    name_new2=[]
+    name_new2=["h11-1","h11-4","h11-8","h11-12"]
+    x = np.arange(len(name_new2))
+    width = 0.20
+    fig, ax = plt.subplots(figsize=(10,10))
+    ax.bar(x-width/2, h11_values_no_first,width,color=colors1)
+    ax.bar(x+width/2, h11_values_complete,width,color=colors2)
+    ax.set_ylabel('Time')
+    ax.set_title('h11 with differente numbers of hosts pinging')
+    ax.set_xticks(x, name_new2)
+    fig.tight_layout()
+    plt.show()

@@ -1,14 +1,12 @@
 PING 10.0.0.7 (10.0.0.7) 56(84) bytes of data.
-64 bytes from 10.0.0.7: icmp_seq=2 ttl=64 time=4.19 ms
-64 bytes from 10.0.0.7: icmp_seq=3 ttl=64 time=0.182 ms
-64 bytes from 10.0.0.7: icmp_seq=4 ttl=64 time=0.073 ms
-64 bytes from 10.0.0.7: icmp_seq=5 ttl=64 time=0.059 ms
-64 bytes from 10.0.0.7: icmp_seq=6 ttl=64 time=0.226 ms
-64 bytes from 10.0.0.7: icmp_seq=7 ttl=64 time=0.025 ms
-64 bytes from 10.0.0.7: icmp_seq=8 ttl=64 time=0.023 ms
-64 bytes from 10.0.0.7: icmp_seq=9 ttl=64 time=0.026 ms
-64 bytes from 10.0.0.7: icmp_seq=10 ttl=64 time=0.029 ms
+From 10.0.0.3 icmp_seq=1 Destination Host Unreachable
+From 10.0.0.3 icmp_seq=2 Destination Host Unreachable
+From 10.0.0.3 icmp_seq=3 Destination Host Unreachable
+64 bytes from 10.0.0.7: icmp_seq=7 ttl=64 time=3.07 ms
+64 bytes from 10.0.0.7: icmp_seq=8 ttl=64 time=0.571 ms
+64 bytes from 10.0.0.7: icmp_seq=9 ttl=64 time=0.017 ms
+64 bytes from 10.0.0.7: icmp_seq=10 ttl=64 time=0.028 ms
 
 --- 10.0.0.7 ping statistics ---
-10 packets transmitted, 9 received, 10% packet loss, time 9224ms
-rtt min/avg/max/mdev = 0.023/0.537/4.192/1.294 ms
+10 packets transmitted, 4 received, +3 errors, 60% packet loss, time 9169ms
+rtt min/avg/max/mdev = 0.017/0.923/3.079/1.264 ms, pipe 4
