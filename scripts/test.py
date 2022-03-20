@@ -137,6 +137,9 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
         else:
             avg.append(somma/(n_ping_contati))
 
+    res = requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/deleteAllIntents/json")
+    print "Test ended: delete all intents - " + str(res)
+
     return avg
 
 if __name__ == "__main__":
