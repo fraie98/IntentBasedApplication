@@ -11,4 +11,6 @@
   <logger name="LogService" level="WARN"/> <!-- Restlet access logging -->
   <logger name="net.floodlightcontroller" level="INFO"/>
   <logger name="org.sdnplatform" level="INFO"/>
+  <logger name="net.floodlightcontroller.unipi.intent.IntentForwarding" level="DEBUG"/> 
+  <logger name="net.floodlightcontroller.forwarding.Forwarding" level="INFO"/>
 </configuration>
