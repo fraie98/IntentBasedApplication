@@ -19,7 +19,7 @@ CONTROLLER_IP="127.0.0.1"
 CONTROLLER_PORT="8080"
 SPINES=2
 LEAFS=3
-N_HOSTS=4
+N_HOSTS=2
 setLogLevel('info')
 print "cleanup junk from old runs"
 Cleanup.cleanup()
@@ -46,15 +46,15 @@ r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/addNewIntent/js
 print r.status_code
 r=requests.get("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/getIntents/json")
 print r.text
-sleep(5)
+#sleep(5)
 # test ping functionality for all hosts again
-print net.pingAll()
-r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/delIntent/json", 
-	json={"host1_IP":"10.0.0.1", "host2_IP":"10.0.0.3"})
-sleep(5)
-print net.pingAll()
-net.configLinkStatus('s11','l21','down')
-sleep(5)
-print net.pingAll()
+#print net.pingAll()
+#r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/delIntent/json", 
+	#json={"host1_IP":"10.0.0.1", "host2_IP":"10.0.0.3"})
+#sleep(5)
+#print net.pingAll()
+#net.configLinkStatus('s11','l21','down')
+#sleep(5)
+#print net.pingAll()
 CLI( net )
 net.stop()

@@ -12,12 +12,23 @@ from mininet.link import TCLink
 from mininet.util import irange
 import requests
 
+from os import remove
+from glob import glob
+
 from time import sleep
 from spine_leaf import dcSpineLeafTopo
 from random import seed
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
+
+DHU=0
+dups=0
+
+def clean_res():
+    files = glob('results/*')
+    for f in files:
+        remove(f)
 
 def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     CONTROLLER_IP="127.0.0.1"
@@ -31,7 +42,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     Cleanup.cleanup()
     print "Create remote controller to which switches are attached"
 
-    rc = RemoteController( "c0", ip=CONTROLLER_IP,  protocols='OpenFlow13')
+    rc = RemoteController( "c0", ip=CONTROLLER_IP,  protocols='OpenFlow13', ipBase='10.0.0.0/8')
     topo = dcSpineLeafTopo(k=SPINES, l=LEAFS, n=N_HOSTS, oRatio=O_RATIO)
 
     net = Mininet(  topo=topo, link=TCLink,build=False, controller=rc )
@@ -39,6 +50,7 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     net.build()
     print "starting network"
     net.start()
+    sleep(7)
 
     print "Dumping host connections"
     dumpNodeConnections(net.hosts)
@@ -71,123 +83,113 @@ def test(SPINES, LEAFS, N_HOSTS, N_HOSTS_TO_TEST, N, HOST_TESTED):
     print "getting intents list"
     r=requests.get("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/getIntents/json")
     print r.text
-    sleep(10)
+    sleep(3)
     # test ping functionality for all hosts at the same time
     counter=0
+    hostnames=[]
     for i in range(1,LEAFS+1):
         exit=False
-	for j in range(1,N_HOSTS+1):
+        for j in range(1,N_HOSTS+1):
             counter+=1
-	    hostName='h%s%s' % (i,j)
-            net.getNodeByName(hostName).sendCmd(  # non-blocking call
-	        'ping',  "-c "+str(N),dest[counter-1], 
-    	        '1> results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.out 2>results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.err &' ) # save results in temporary files
+            hostName='h%s%s' % (i,j)
+            hostnames.append(hostName)
+            ping_cmd='ping -c '+str(N)+' '    # save results in temporary files
+            ping_cmd+=dest[counter-1]+' 1> results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.out 2>results/'+hostName+'_ping_'+str(N_HOSTS_TO_TEST)+'.err ' 
+            net.getNodeByName(hostName).sendCmd( ping_cmd) # non-blocking call
             if counter==N_HOSTS_TO_TEST:
                 exit=True
                 break
         if exit:
             break
 
-    sleep(N+10)
-    CLI( net )
+    for host in hostnames:
+        print host+" "+net.getNodeByName(host).monitor(timeoutms=10)
+    res = requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/deleteAllIntents/json")
+    print "Test ended: delete all intents - " + str(res)
     net.stop()
-
     hostName=HOST_TESTED
-    avg=[]
-
+    avgWo1=[]
+    avgC=[]
+    global DHU
+    global dups
     # compiute avg without first ping
     for h in range(N_HOSTS_TO_TEST):
         somma=0
         n_ping_contati=0
+        first=0
         f = open("results/"+hostName[h]+'_ping_'+str(N_HOSTS_TO_TEST)+".out", "r")
         for x in f:
             #if counter==1:
                 #continue
-            if "time" in x and "ttl" in x:
-                if "seq=1 " in x:
-                    continue
+            if "seq" in x :
                 if "Destination Host Unreachable" in x:
+                    DHU+=1
+                    continue
+                if "DUP!" in x:
+                    dups+=1
                     continue
                 a=x.split(" ")
                 b=a[6].split("=")
+                if first!=0:
+                    first=b[1]
+                    continue
 	        somma+=float(b[1])
-                n_ping_contati=n_ping_contati+1
-        if n_ping_contati==0:
-            avg.append(0)
-        else:
-            avg.append(somma/(n_ping_contati))
+            n_ping_contati=n_ping_contati+1
+        if n_ping_contati!=0:
+            avgWo1.append(somma/n_ping_contati)    
+            avgC.append((somma+first)/(n_ping_contati+1))        
 
-    # compiute avg with first ping
-    for h in range(N_HOSTS_TO_TEST):
-        somma=0
-        n_ping_contati=0
-        f = open("results/"+hostName[h]+'_ping_'+str(N_HOSTS_TO_TEST)+".out", "r")
-        for x in f:
-            #if counter==1:
-               #continue
-            if "time" in x and "ttl" in x:
-                if "Destination Host Unreachable" in x:
-                    continue
-                a=x.split(" ")
-                b=a[6].split("=")
-                somma+=float(b[1])
-                n_ping_contati=n_ping_contati+1
-        if n_ping_contati==0:
-            avg.append(0)
-        else:
-            avg.append(somma/(n_ping_contati))
+    return avgWo1, avgC
 
-    res = requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/deleteAllIntents/json")
-    print "Test ended: delete all intents - " + str(res)
-
-    return avg
 
 if __name__ == "__main__":
 
+    global DHU
+    global dups
     hosts=["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
     h11_values_no_first=[]
     h11_values_complete=[]
 
-    avg=test(2,3,4,1,10,hosts)
-    avg_1_complete=avg[1]
-    avg_1_no_first=avg[0]
+    clean_res()
+    avg_1_no_first, avg_1_complete=test(2,3,4,1,10,hosts)
+    
     h11_values_no_first.append(avg_1_no_first)
     h11_values_complete.append(avg_1_complete)
 
-    avg=test(2,3,4,4,10,hosts)
-    avg_4_complete=avg[4:]
-    avg_4_no_first=avg[:4]
+    
+    avg_4_no_first, avg_4_complete=test(2,3,4,4,10,hosts)
     h11_values_no_first.append(avg_4_no_first[0])
     h11_values_complete.append(avg_4_complete[0])
-
-    avg=test(2,3,4,8,10,hosts)
-    avg_8_complete=avg[8:]
-    avg_8_no_first=avg[:8]
+    
+    avg_8_no_first, avg_8_complete=test(2,3,4,8,10,hosts)
     h11_values_no_first.append(avg_8_no_first[0])
     h11_values_complete.append(avg_8_complete[0])
-
-    avg=test(2,3,4,12,10,hosts)
-    avg_12_complete=avg[12:]
-    avg_12_no_first=avg[:12]
+    
+    
+    avg_12_no_first, avg_12_complete=test(2,3,4,12,10,hosts)
     h11_values_no_first.append(avg_12_no_first[0])
     h11_values_complete.append(avg_12_complete[0])
-
+    
+    
     print "-- 1 ping --"
     print avg_1_complete
     print avg_1_no_first
-
+    
     print "-- 4 ping --"
     print avg_4_complete
     print avg_4_no_first
-
+    
     print "-- 8 ping --"
     print avg_8_complete
     print avg_8_no_first
-
+    
+    
     print "-- 12 ping --"
     print avg_12_complete
     print avg_12_no_first
-
+    
+    print "DHU "+str(DHU)
+    print "dups "+str(dups)
     print "-- plots host mean time --"
     name_new=[]
     for i in range(1,13,1):
