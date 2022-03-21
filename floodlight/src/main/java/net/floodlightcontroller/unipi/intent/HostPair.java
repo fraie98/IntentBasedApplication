@@ -1,6 +1,8 @@
 package net.floodlightcontroller.unipi.intent;
 
 
+import java.util.TimerTask;
+
 import org.projectfloodlight.openflow.types.IPv4Address;
 import net.floodlightcontroller.core.IOFSwitch;
 
@@ -12,7 +14,6 @@ public class HostPair {
 	protected IPv4Address host2IP;
 	protected IOFSwitch sw2;
 	protected long timeout;
-	
 
 	public HostPair(IPv4Address hostA, IPv4Address hostB, long timeoutToSet) {
 		host1IP = hostA;
@@ -97,4 +98,12 @@ public class HostPair {
 		
 		return false;
 	}
+	
+	@Override 
+	public String  toString(){
+		return host1IP.toString()+" - "+host2IP.toString();
+		
+	}
+	
+	
 }
