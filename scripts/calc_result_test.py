@@ -1,20 +1,30 @@
+#!/usr/bin/python2
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as st
 
 DHU=0
 dups=0
+confidence=0.8
+
+# compute the samlpe mean and the mean error (simmetric) for a given confidence
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), st.sem(a)
+    h = se * st.t.ppf((1 + confidence) / 2., n-1)
+    return m, h
 
 def calc(N_HOSTS_TO_TEST, HOST_TESTED):
     hostName=HOST_TESTED
     avgWo1=[]
-    avgC=[]
+    first=[]
+    conf=[]
     global DHU
     global dups
     # compiute avg without first ping
     for h in range(N_HOSTS_TO_TEST):
-        somma=0
-        n_ping_contati=0
-        first=0
+        times=[]
         f = open("results/"+hostName[h]+'_ping_'+str(N_HOSTS_TO_TEST)+".out", "r")
         for x in f:
             #if counter==1:
@@ -28,16 +38,14 @@ def calc(N_HOSTS_TO_TEST, HOST_TESTED):
                     continue
                 a=x.split(" ")
                 b=a[6].split("=")
-                if first==0:
-                    first=float(b[1])
-                    continue
-                somma+=float(b[1])
-                n_ping_contati+=1
-        if n_ping_contati!=0:
-            avgWo1.append(somma/n_ping_contati)
-            avgC.append((somma+first)/(n_ping_contati+1))
+                times.append(float(b[1]))
+        if len(times)>1:
+            avg, conf_int=mean_confidence_interval(times[1:],confidence )
+            avgWo1.append(avg)
+            conf.append(conf_int)
+            first.append(times[0])  
 
-    return avgWo1, avgC
+    return avgWo1, first, conf
 
 if __name__ == "__main__":
 
@@ -46,25 +54,29 @@ if __name__ == "__main__":
     hosts=["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
     h11_values_no_first=[]
     h11_values_complete=[]
-
-    avg_1_no_first, avg_1_complete=calc(1,hosts)
+    h11_values_conf=[]
+ 
+    avg_1_no_first, avg_1_complete, conf1=calc(1,hosts)
 
     h11_values_no_first.append(avg_1_no_first)
     h11_values_complete.append(avg_1_complete)
+    h11_values_conf.append(conf1)
 
-
-    avg_4_no_first, avg_4_complete=calc(4,hosts)
+    avg_4_no_first, avg_4_complete,conf4=calc(4,hosts)
     h11_values_no_first.append(avg_4_no_first[0])
     h11_values_complete.append(avg_4_complete[0])
+    h11_values_conf.append(conf4[0])
 
-    avg_8_no_first, avg_8_complete=calc(8,hosts)
+    avg_8_no_first, avg_8_complete,conf8=calc(8,hosts)
     h11_values_no_first.append(avg_8_no_first[0])
     h11_values_complete.append(avg_8_complete[0])
+    h11_values_conf.append(conf8[0])
 
 
-    avg_12_no_first, avg_12_complete=calc(12,hosts)
+    avg_12_no_first, avg_12_complete, conf12=calc(12,hosts)
     h11_values_no_first.append(avg_12_no_first[0])
     h11_values_complete.append(avg_12_complete[0])
+    h11_values_conf.append(conf12[0])
 
 
     print "-- 1 ping --"
@@ -92,29 +104,45 @@ if __name__ == "__main__":
 
     x = np.arange(len(name_new))
     width = 0.35
-    fig, ax = plt.subplots(figsize=(15,10))
-    ax.bar(x - width/2, avg_12_no_first, width, label='No first',data=name_new)
-    ax.bar(x + width/2, avg_12_complete, width, label='Complete',data=name_new)
+    figure, axis = plt.subplots(1,2, figsize=(20,10))
+    ax=axis[0]
+    ax.bar(x - width/2, avg_12_no_first, width, label='No first',data=name_new, yerr=conf12)
     ax.set_ylabel('Time')
-    ax.set_title('Mean time with and without first ping')
+    ax.set_title('Mean time w/o first ping ('+str(confidence*100)+'% CI)')
     ax.set_xticks(x)
     ax.set_xticklabels(name_new)
     ax.legend()
-    fig.tight_layout()
-    plt.show()
 
+    ax=axis[1]
+    ax.set_ylabel('Time')
+    ax.set_title('Mean time of first ping')
+    ax.set_xticks(x)
+    ax.set_xticklabels(name_new)
+    ax.legend()
+    #ax.set_yticks(np.arange(0,30,5))
+    ax.bar(x + width/2, avg_12_complete, width, label='Complete',data=name_new)
+    
+    
+    
     print "-- plots h11 mean time --"
-    colors1=['royalblue','orange','tomato','limegreen']
+    #colors1=['royalblue','orange','tomato','limegreen']
     colors2=['darkblue','darkorange','firebrick','darkgreen']
-    name_new2=[]
     name_new2=["h11-1","h11-4","h11-8","h11-12"]
     x = np.arange(len(name_new2))
     width = 0.20
-    fig, ax = plt.subplots(figsize=(10,10))
-    ax.bar(x-width/2, h11_values_no_first,width,color=colors1)
+    plt.figure(1)
+    figure, axis = plt.subplots(1,2, figsize=(20,10))
+    ax=axis[0]
+    ax.bar(x-width/2, h11_values_no_first,width,color=colors2, yerr=h11_values_conf)
+    ax.set_ylabel('Time')
+    ax.set_title('h11 mean time with differente numbers of hosts pinging ('+str(confidence*100)+'% CI)')
+    ax.set_xticks(x)
+    ax.set_xticklabels(name_new2)
+
+    ax=axis[1]
     ax.bar(x+width/2, h11_values_complete,width,color=colors2)
     ax.set_ylabel('Time')
-    ax.set_title('h11 with differente numbers of hosts pinging')
-    ax.set_xticks(x, name_new2)
-    fig.tight_layout()
+    ax.set_title('h11 1st ping tim with differente numbers of hosts pinging')
+    ax.set_xticks(x)
+    ax.set_xticklabels(name_new2)
     plt.show()
