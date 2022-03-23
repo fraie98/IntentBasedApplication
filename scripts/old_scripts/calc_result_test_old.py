@@ -3,12 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
 
-DHU = 0
-dups = 0
-confidence = 0.8
-FIRST_PING_ONLY_H11 = False
+DHU=0
+dups=0
+confidence=0.8
 
-# compute the sample mean and the mean error (simmetric) for a given confidence
+# compute the samlpe mean and the mean error (simmetric) for a given confidence
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
@@ -48,58 +47,37 @@ def calc(N_HOSTS_TO_TEST, HOST_TESTED):
 
     return avgWo1, first, conf
 
-def compute_avg_first_ping(avg_x_complete):
-    counter = 0
-    sum_first_ping = 0
-    for i in avg_x_complete:
-    	sum_first_ping += i
-    	counter += 1
-    return sum_first_ping/counter 
-
-
 if __name__ == "__main__":
 
     global DHU
     global dups
-    global FIRST_PING_ONLY_H11
-    hosts = ["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
-    h11_values_no_first = []
-    values_complete = []
-    h11_values_conf = []
+    hosts=["h11","h12","h13","h14","h21","h22","h23","h24","h31","h32","h33","h34"]
+    h11_values_no_first=[]
+    h11_values_complete=[]
+    h11_values_conf=[]
  
     avg_1_no_first, avg_1_complete, conf1=calc(1,hosts)
 
     h11_values_no_first.append(avg_1_no_first)
-    values_complete.append(avg_1_complete)
+    h11_values_complete.append(avg_1_complete)
     h11_values_conf.append(conf1)
 
     avg_4_no_first, avg_4_complete,conf4=calc(4,hosts)
     h11_values_no_first.append(avg_4_no_first[0])
-    if FIRST_PING_ONLY_H11:
-        values_complete.append(avg_4_complete[0])
-    else:
-        avg_4_first_ping = compute_avg_first_ping(avg_4_complete)   
-        values_complete.append(avg_4_first_ping)
+    h11_values_complete.append(avg_4_complete[0])
     h11_values_conf.append(conf4[0])
 
     avg_8_no_first, avg_8_complete,conf8=calc(8,hosts)
     h11_values_no_first.append(avg_8_no_first[0])
-    if FIRST_PING_ONLY_H11:
-        values_complete.append(avg_8_complete[0])
-    else:
-        avg_8_first_ping = compute_avg_first_ping(avg_8_complete) 
-        values_complete.append(avg_8_first_ping)
+    h11_values_complete.append(avg_8_complete[0])
     h11_values_conf.append(conf8[0])
 
 
     avg_12_no_first, avg_12_complete, conf12=calc(12,hosts)
     h11_values_no_first.append(avg_12_no_first[0])
-    if FIRST_PING_ONLY_H11:
-        values_complete.append(avg_12_complete[0])
-    else:
-        avg_12_first_ping = compute_avg_first_ping(avg_12_complete) 
-        values_complete.append(avg_12_first_ping)
+    h11_values_complete.append(avg_12_complete[0])
     h11_values_conf.append(conf12[0])
+
 
     print "-- 1 ping --"
     print avg_1_complete
@@ -120,7 +98,7 @@ if __name__ == "__main__":
     print "DHU "+str(DHU)
     print "dups "+str(dups)
     print "-- plots host mean time --"
-    name_new = []
+    name_new=[]
     for i in range(1,13,1):
         name_new.append("host"+str(i))
 
@@ -162,12 +140,9 @@ if __name__ == "__main__":
     ax.set_xticklabels(name_new2)
 
     ax=axis[1]
-    ax.bar(x+width/2, values_complete,width,color=colors2)
+    ax.bar(x+width/2, h11_values_complete,width,color=colors2)
     ax.set_ylabel('Time')
-    if FIRST_PING_ONLY_H11:
-        ax.set_title('h11 1st ping time with differente numbers of hosts pinging')
-    else:
-        ax.set_title('1st ping average time with differente numbers of hosts pinging')
+    ax.set_title('h11 1st ping tim with differente numbers of hosts pinging')
     ax.set_xticks(x)
     ax.set_xticklabels(name_new2)
     plt.show()
