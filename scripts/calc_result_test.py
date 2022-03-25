@@ -78,7 +78,7 @@ if __name__ == "__main__":
     if FIRST_PING_ONLY_H11:
         values_complete.append(avg_4_complete[0])
     else:
-        avg_4_first_ping, conf = mean_confidence_interval(avg_4_complete)   
+        avg_4_first_ping, conf = mean_confidence_interval(avg_4_complete, confidence)   
         values_complete.append(avg_4_first_ping)
         conf_complete.append(conf)
     h11_values_conf.append(conf4[0])
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     if FIRST_PING_ONLY_H11:
         values_complete.append(avg_8_complete[0])
     else:
-        avg_8_first_ping, conf = mean_confidence_interval(avg_8_complete)   
+        avg_8_first_ping, conf = mean_confidence_interval(avg_8_complete,confidence)   
         values_complete.append(avg_8_first_ping)
         conf_complete.append(conf)
     h11_values_conf.append(conf8[0])
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     if FIRST_PING_ONLY_H11:
         values_complete.append(avg_12_complete[0])
     else:
-        avg_12_first_ping, conf = mean_confidence_interval(avg_12_complete)   
+        avg_12_first_ping, conf = mean_confidence_interval(avg_12_complete,confidence)   
         values_complete.append(avg_12_first_ping)
         conf_complete.append(conf)
     h11_values_conf.append(conf12[0])
