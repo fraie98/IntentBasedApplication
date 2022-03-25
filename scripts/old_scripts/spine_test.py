@@ -36,7 +36,7 @@ print "Dumping host connections"
 dumpNodeConnections(net.hosts)
 
 # test ping functionality for all hosts
-#print net.pingAll()
+print net.pingAll()
 
 print "adding intent connection"
 r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/addNewIntent/json", 
@@ -46,15 +46,15 @@ r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/addNewIntent/js
 print r.status_code
 r=requests.get("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/getIntents/json")
 print r.text
-#sleep(5)
+sleep(1)
 # test ping functionality for all hosts again
-#print net.pingAll()
+print net.pingAll()
 #r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/delIntent/json", 
 	#json={"host1_IP":"10.0.0.1", "host2_IP":"10.0.0.3"})
 #sleep(5)
 #print net.pingAll()
-#net.configLinkStatus('s11','l21','down')
-#sleep(5)
-#print net.pingAll()
+net.configLinkStatus('s11','l21','down')
+sleep(5)
+print net.pingAll()
 CLI( net )
 net.stop()
