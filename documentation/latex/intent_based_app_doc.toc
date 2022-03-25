@@ -13,4 +13,5 @@
 \contentsline {section}{\numberline {1.4}Responsiveness To Link Failures \& Topology Changes}{7}{}%
 \contentsline {section}{\numberline {1.5}UML Class Diagram}{7}{}%
 \contentsline {chapter}{\numberline {2}Testing}{8}{}%
-\contentsline {section}{\numberline {2.1}Ping Latency}{9}{}%
+\contentsline {section}{\numberline {2.1}Link Failure Test}{8}{}%
+\contentsline {section}{\numberline {2.2}Ping Latency}{10}{}%

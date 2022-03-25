@@ -12,11 +12,54 @@ We want to simulate a typical data center scenario with a single LAN, implemente
 is widely used thanks to its easy scalability and sufficient redundancy.
 \begin{figure}[h]
     \centering
-    \caption{example of \textit{spine-leaf} topology}
     \includegraphics[width=0.90\textwidth]{img/spine_leaf.pdf}
+    \caption{example of \textit{spine-leaf} topology}
 \end{figure}
 
-Using \texttt{mininet}, we can also simulate an episode of link failure, in order to test the system behaviour in this specific case. The system is able to recompute a functional path between two host and use it to forward packets.
+\section{Link Failure Test}
+\noindent Using \texttt{mininet}, we can also simulate an episode of link failure, in order to test the system behaviour in this specific case. The system is able to recompute a functional path between two host and use it to forward packets.
+
+\noindent In order to perform this test we use a spine leaf network with 2 spines and 3 leaf, each leaf has two hosts connected to it. The links of the network can be seen in figure \ref{img:links}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.50\textwidth]{img/links.png}
+	\caption{Links of the spine leaf network}
+	\label{img:links}
+\end{figure}
+
+\noindent To prove that the system is capable of handling a link failure we will establish an intent, use wireshark to sniff the traffic on the interfaces of the spines and see what happens when a link failure takes place and how the traffic is redirected.
+
+\noindent The first thing to do is obviously to start the floodligh controller and the network\footnote{through the script scripts/start\_only\_spine\_topo.py}, then we establish an intent between the host11 (connected to leaf21) and the host21 (connected to leaf22). In order to check the connectivity we use wireshark on spine11-eth1 (the interface that connects leaf21 with spine11) and spine12-eth1 (the interface that connects leaf21 with spine12) and we perform a ping between the two hosts to see what happens on these interfaces.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\textwidth]{img/ping1.png}
+\caption{Ping between host11 and host21}
+\label{img:ping1}
+\end{figure}
+
+\noindent As we can see in figure \ref{img:ping1} the ping is executed succesfully and the interface spine12-eth1 is used to forward the traffic. Now we put down the link between leaf21 and spine12, so the interface spine12-eth1 is now down (see figure \ref{img:linkdown}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{img/linkdown.png}
+	\caption{We put down the link between leaf21 and spine12}
+	\label{img:linkdown}
+\end{figure}
+
+\noindent Then we perform another time the ping and we see that the interface spine11-eth1 is used to forward traffic (see figure \ref{img:failurehandler}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{img/failurehandler.png}
+	\caption{Host11 now uses spine11-eth1 to perform the ping}
+	\label{img:failurehandler}
+\end{figure}
+
+\noindent Thus we can state that at the beginning host11 used spine21 to communicate with host21 but when the link between leaf21 and spine21 failed (and so host11 cannot communicate anymore with spine21) host11 uses spine11 and so the intent continues to be valid. Hence the system is able to cope with a link failure.
+
+
 \newpage
 \section{Ping Latency}
 In order to measure the network performance we will consider a fixed scenario with 2 spines, 3 leafs and 4 hosts for each leafs (i.e. 12 hosts in total);
