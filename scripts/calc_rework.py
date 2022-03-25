@@ -120,14 +120,14 @@ if __name__ == "__main__":
     ax=axis[0]
     ax.bar(x, total_val,width,color=colors2, yerr=total_conf)
     ax.set_ylabel('Time')
-    ax.set_title('Mean time with differente numbers of hosts pinging ('+str(conf_lev*100)+'% CI) w/o first ping')
+    ax.set_title('Mean time with different numbers of hosts pinging ('+str(conf_lev*100)+'% CI) w/o first ping')
     ax.set_xticks(x)
     #ax.set_xticklabels(name_new2)
 
     ax=axis[1]
     ax.bar(x, total_val_1st,width,color=colors2, yerr=total_conf_1st)
     ax.set_ylabel('Time')
-    ax.set_title('1st ping mean time with differente numbers of hosts pinging ('+str(conf_lev*100)+'% CI)')
+    ax.set_title('1st ping mean time with different numbers of hosts pinging ('+str(conf_lev*100)+'% CI)')
     ax.set_xticks(x)
     #ax.set_xticklabels(name_new2)
     plt.show()
