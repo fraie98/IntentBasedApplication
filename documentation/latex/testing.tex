@@ -30,37 +30,38 @@ is widely used thanks to its easy scalability and sufficient redundancy.
 
 \noindent To prove that the system is capable of handling a link failure we will establish an intent, use wireshark to sniff the traffic on the interfaces of the spines and see what happens when a link failure takes place and how the traffic is redirected.
 
-\noindent The first thing to do is obviously to start the floodligh controller and the network\footnote{through the script scripts/start\_only\_spine\_topo.py}, then we establish an intent between the host11 (connected to leaf21) and the host21 (connected to leaf22). In order to check the connectivity we use wireshark on spine11-eth1 (the interface that connects leaf21 with spine11) and spine12-eth1 (the interface that connects leaf21 with spine12) and we perform a ping between the two hosts to see what happens on these interfaces.
+\noindent The first thing to do is obviously to start the floodlight controller and the network\footnote{through the script scripts/start\_only\_spine\_topo.py}, then we establish an intent between the host11 (connected to leaf21) and the host21 (connected to leaf22). In order to check the connectivity we use wireshark on spine11-eth1 (the interface that connects leaf21 with spine11) and spine12-eth1 (the interface that connects leaf21 with spine12) and we perform a ping between the two hosts to see what happens on these interfaces.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=1\textwidth]{img/ping1.png}
+\includegraphics[width=1\textwidth]{img/test1.png}
 \caption{Ping between host11 and host21}
 \label{img:ping1}
 \end{figure}
 
-\noindent As we can see in figure \ref{img:ping1} the ping is executed succesfully and the interface spine12-eth1 is used to forward the traffic. Now we put down the link between leaf21 and spine12, so the interface spine12-eth1 is now down (see figure \ref{img:linkdown}).
+\noindent As we can see in figure \ref{img:ping1} the ping is executed successfully and both interfaces are used, one for sending packets from h11 to h21 and the other for the reverse path.
+
+\noindent Now we put down the link between leaf21 and spine11, so the interface spine11-eth1 goes down (see figure \ref{img:linkdown}). Nevertheless we can see that the ping continues to be performed successfully because now only the interface spine12-eth1 is used for both the direct and the reverse path (figure \ref{img:linkdown}).
+
+\noindent The only indication that a link failure has took place is the fact that one ping needs more time to be completed (see figure \ref{img:ping_detail}) because of the overhead caused by the reconfiguration of the path, but the connectivity is ensured in any case (in fact in figure \ref{img:ping_detail} we can see that no icmp packets have been lost because there is no gap in icmp\_seq) and the delay affects only one packet. Hence at the end we can say that the intent continues to work even if a link fails, thus the system is able to cope with a link failure.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=1\textwidth]{img/linkdown.png}
-	\caption{We put down the link between leaf21 and spine12}
+	\includegraphics[width=1\textwidth]{img/test2.png}
+	\caption{We put down the link between leaf21 and spine11 but the ping continues to work.}
 	\label{img:linkdown}
 \end{figure}
 
-\noindent Then we perform another time the ping and we see that the interface spine11-eth1 is used to forward traffic (see figure \ref{img:failurehandler}).
-
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=1\textwidth]{img/failurehandler.png}
-	\caption{Host11 now uses spine11-eth1 to perform the ping}
-	\label{img:failurehandler}
+	\includegraphics[width=1\textwidth]{img/ping_detail.png}
+	\caption{}
+	\label{img:ping_detail}
 \end{figure}
-
-\noindent Thus we can state that at the beginning host11 used spine21 to communicate with host21 but when the link between leaf21 and spine21 failed (and so host11 cannot communicate anymore with spine21) host11 uses spine11 and so the intent continues to be valid. Hence the system is able to cope with a link failure.
 
 
 \newpage
+
 \section{Ping Latency}
 In order to measure the network performance we will consider a fixed scenario with 2 spines, 3 leafs and 4 hosts for each leafs (i.e. 12 hosts in total);
 for every host:
