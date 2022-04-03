@@ -36,4 +36,6 @@ print "Dumping host connections"
 dumpNodeConnections(net.hosts)
 r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/addNewIntent/json", 
 	json={"host1_IP":"10.0.0.1", "host2_IP":"10.0.0.3", "timeout":1000000 })
+r=requests.post("http://"+CONTROLLER_IP+":"+CONTROLLER_PORT+"/lb/addNewIntent/json", 
+	json={"host1_IP":"10.0.0.1", "host2_IP":"10.0.0.2", "timeout":1000000 })
 CLI(net)
