@@ -1,8 +1,6 @@
 package net.floodlightcontroller.unipi.intent;
 
 
-import java.util.TimerTask;
-
 import org.projectfloodlight.openflow.types.IPv4Address;
 import net.floodlightcontroller.core.IOFSwitch;
 

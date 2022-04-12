@@ -19,7 +19,6 @@ net.floodlightcontroller.simpleft.FT
 net.floodlightcontroller.staticentry.StaticEntryPusher
 net.floodlightcontroller.topology.TopologyManager
 net.floodlightcontroller.unipi.intent.IntentForwarding
-net.floodlightcontroller.loadbalancer.LoadBalancer
 net.floodlightcontroller.linkdiscovery.internal.LinkDiscoveryManager
 net.floodlightcontroller.devicemanager.internal.DeviceManagerImpl
 net.floodlightcontroller.firewall.Firewall
@@ -30,5 +29,3 @@ net.floodlightcontroller.statistics.StatisticsCollector
 net.floodlightcontroller.routing.RoutingManager
 net.floodlightcontroller.cpanalyzer.CPAnalyzer
 net.floodlightcontroller.hasupport.HAController
-net.floodlightcontroller.unipi.mactracker.MACTracker
-net.floodlightcontroller.unipi.virtualaddress.VirtualAddress
